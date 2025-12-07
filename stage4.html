@@ -1,0 +1,252 @@
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Stage 4 – Folder Sort Game (Multi-Falling)</title>
+
+<style>
+  body {
+    background: #ffe7ff;
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+    font-family: 'Arial';
+  }
+
+  .stage4-bg {
+    width: 100%;
+    position: relative;
+    top: 0;
+    z-index: 1;
+  }
+
+  #stage4Canvas {
+    position: absolute;
+    top: 170px;
+    left: 375px;
+    width: 700px;
+    height: 700px;
+    background: transparent;
+    z-index: 5;
+  }
+
+  .bucket-container {
+    position: absolute;
+    top: 780px;
+    left: 375px;
+    width: 700px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+  }
+
+  .bucket {
+    width: 140px;
+    height: 140px;
+    border: 4px solid #ffffff;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow: hidden;
+  }
+
+  .bucket img {
+    width: 500px;
+    height: 500px;
+  }
+
+  #scoreText {
+    position:absolute;
+    top:130px;
+    left:380px;
+    font-size:32px;
+    font-weight:bold;
+    z-index:99;
+    color:#000;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="scoreText">Score: 0 / 7</div>
+
+<div id="container">
+  <div id="frame16x9">
+
+      <img src="assets/basicbg.png" class="stage4-bg">
+
+      <canvas id="stage4Canvas" width="700" height="700"></canvas>
+
+      <div class="bucket-container">
+        <div class="bucket" data-bucket="1"><img src="assets/folder1.png"></div>
+        <div class="bucket" data-bucket="2"><img src="assets/folder2.png"></div>
+        <div class="bucket" data-bucket="3"><img src="assets/folder3.png"></div>
+        <div class="bucket" data-bucket="4"><img src="assets/folder4.png"></div>
+        <div class="bucket" data-bucket="5"><img src="assets/folder5.png"></div>
+      </div>
+
+  </div>
+</div>
+
+<script>
+/* -----------------------------------------------------------
+   Multi-Falling Folder Game with Drag Support
+   (BIG + SLOW FALLING + 7 SCORE GAME END)
+----------------------------------------------------------- */
+
+const canvas = document.getElementById("stage4Canvas");
+const ctx = canvas.getContext("2d");
+
+let folderImages = [];
+let folders = []; 
+let successCount = 0;
+let gameRunning = true;
+
+/* LOAD IMAGES */
+for (let i = 1; i <= 5; i++) {
+  const img = new Image();
+  img.src = `assets/folder${i}.png`;
+  folderImages[i] = img;
+}
+
+/* CREATE ONE FALLING FOLDER */
+function createFolder() {
+  return {
+    id: Math.floor(Math.random() * 5) + 1,  // random folder1~5
+    x: Math.random() * 250 + 20,            // random start x
+    y: -300 - Math.random() * 500,          // start far above screen
+    speed: 0.7 + Math.random() * 0.5,       // SLOW falling speed
+    dragging: false,
+    offsetX: 0,
+    offsetY: 0
+  };
+}
+
+/* START WITH 4 FALLING FOLDERS (GOOD BALANCE) */
+for (let i = 0; i < 4; i++) {
+  folders.push(createFolder());
+}
+
+/* DRAW ALL FOLDERS */
+function draw() {
+  ctx.clearRect(0, 0, 700, 700);
+
+  folders.forEach(f => {
+    ctx.drawImage(folderImages[f.id], f.x, f.y, 350, 350); // BIG SIZE
+  });
+}
+
+/* UPDATE POSITIONS */
+function update() {
+  if (!gameRunning) return;
+
+  folders.forEach(f => {
+    if (!f.dragging) f.y += f.speed; // apply gravity unless dragging
+
+    // BOTTOM CHECK
+    if (f.y >= 380) {
+      checkBucket(f);
+    }
+  });
+}
+
+/* GAME LOOP */
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* MOUSE POSITION HELPER */
+function getMousePos(evt) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+}
+
+/* DRAG START */
+canvas.addEventListener("mousedown", (e) => {
+  const mouse = getMousePos(e);
+
+  // Top-most folder first
+  for (let i = folders.length - 1; i >= 0; i--) {
+    const f = folders[i];
+
+    if (
+      mouse.x >= f.x &&
+      mouse.x <= f.x + 350 &&
+      mouse.y >= f.y &&
+      mouse.y <= f.y + 350
+    ) {
+      f.dragging = true;
+      f.offsetX = mouse.x - f.x;
+      f.offsetY = mouse.y - f.y;
+      return;
+    }
+  }
+});
+
+/* DRAG MOVE */
+canvas.addEventListener("mousemove", (e) => {
+  const mouse = getMousePos(e);
+
+  folders.forEach(f => {
+    if (f.dragging) {
+      f.x = mouse.x - f.offsetX;
+      f.y = mouse.y - f.offsetY;
+    }
+  });
+});
+
+/* DRAG END */
+canvas.addEventListener("mouseup", () => {
+  folders.forEach(f => f.dragging = false);
+});
+
+/* BUCKET CHECK */
+function checkBucket(folder) {
+  const buckets = document.querySelectorAll(".bucket");
+  const canvasRect = canvas.getBoundingClientRect();
+
+  const fx = folder.x + canvasRect.left + 175;
+  const fy = folder.y + canvasRect.top + 175;
+
+  buckets.forEach(bucket => {
+    const rect = bucket.getBoundingClientRect();
+    const bucketNum = Number(bucket.getAttribute("data-bucket"));
+
+    if (fx >= rect.left && fx <= rect.right && fy >= rect.top && fy <= rect.bottom) {
+
+      // CORRECT MATCH
+      if (folder.id === bucketNum) {
+        successCount++;
+        document.getElementById("scoreText").innerText =
+          `Score: ${successCount} / 7`;
+
+        // WIN CONDITION
+        if (successCount >= 7) {
+          gameRunning = false;
+          alert("🎉 YOU WIN! 🎉");
+          return;
+        }
+      }
+
+      // remove and replace folder
+      folders.splice(folders.indexOf(folder), 1);
+      folders.push(createFolder());
+    }
+  });
+
+  /* IF FOLDER FALLS OUT OF SCREEN → RESPAWN */
+  if (folder.y > 900) {
+    folders.splice(folders.indexOf(folder), 1);
+    folders.push(createFolder());
+  }
+}
+
+loop(); // START GAME
+</script>
+
+</body>
+</html>

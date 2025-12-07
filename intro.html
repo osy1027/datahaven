@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Intro</title>
+
+    <!-- 공통 배경 스타일 -->
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        #container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #frame16x9 {
+            width: 90vw;
+            aspect-ratio: 16 / 9;
+            position: relative;
+        }
+
+        .intro-bg {
+            max-width: 120%;
+            max-height: 120%;
+            object-fit: contain;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+       /* 제목 이미지 */
+        .title-image {
+            position: absolute;
+            top: -10%;       /* 위쪽 여백 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110%;     /* 적당한 크기 */
+            pointer-events: none;
+        }
+
+         .intro-character {
+            max-width: 110%;
+            max-height: 130%;
+            object-fit: contain;
+            position: absolute;
+            bottom: -50px;
+            right: -30px;
+            pointer-events: none;
+        }
+
+
+        /* START 버튼 이미지 */
+      /* 반짝이는 shimmer 효과 */
+.start-button {
+    position: absolute;
+    bottom: 0%;
+    left: 45%;
+    transform: translateX(-50%);
+    width: 1500px;
+    cursor: pointer;
+    transition: 0.2s;
+    overflow: hidden; /* 강조 */
+}
+
+.start-button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.6) 50%,
+        rgba(255,255,255,0) 100%
+    );
+    animation: shine 2.5s infinite;
+}
+
+@keyframes shine {
+    0% { left: -100%; }
+    60% { left: 150%; }
+    100% { left: 150%; }
+}
+
+
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <div id="frame16x9">
+
+            <img src="assets/mini_bg.png" class="intro-bg">
+
+            <img src="assets/title.png" class="title-image">
+
+            <img src="assets/intro_character.png" class="intro-character">
+
+            <!-- ★ 이미지 START 버튼 -->
+            <img src="assets/start_btn.png" class="start-button" onclick="startGame()">
+
+        </div>
+    </div>
+
+    <script>
+        function startGame() {
+            window.location.href = "stage1.html";
+        }
+    </script>
+
+</body>
+</html>

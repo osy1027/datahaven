@@ -1,0 +1,102 @@
+/* 입력창 전체 컨테이너 (중앙 정렬) */
+.input-container {
+  position: absolute;
+  top: 430px;           /* 입력창 세로 위치 조정 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  text-align: center;
+}
+
+/* 입력창 자체 스타일 */
+.food-input {
+  width: 420px;         /* 너비 조정 */
+  height: 55px;         /* 높이 조정 */
+  padding: 10px 15px;
+  font-size: 20px;      /* 글씨 크기 조정 */
+  color: #c700c7;
+  background: rgba(255, 255, 255, 0.55);
+  border: 2px solid #ff91ff;
+  border-radius: 14px;
+  outline: none;
+}
+
+/* placeholder 스타일 조정 */
+.food-input::placeholder {
+  font-size: 18px;      /* placeholder 크기 */
+  color: #d45bd4;       /* placeholder 색상 */
+  opacity: 1;
+}
+
+/* 버튼 영역 */
+.button-container {
+  position: absolute;
+  bottom: 40px;         /* 버튼 세로 위치 조정 */
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  width: 100%;
+}
+
+/* 확인 버튼 */
+.submit-btn {
+  width: 200px;         /* 버튼 너비 */
+  height: 65px;         /* 버튼 높이 */
+  font-size: 24px;      /* 폰트 크기 */
+  background: rgba(255, 255, 255, 0.6);
+  border: 3px solid #ff90ff;
+  border-radius: 16px;
+  color: #c700c7;
+  cursor: pointer;
+  margin-bottom: 15px;  /* 확인 버튼과 다시 버튼 사이 여백 */
+}
+
+/* 다시 버튼 */
+.retry-btn {
+  width: 200px;
+  height: 60px;
+  font-size: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid #ff90ff;
+  border-radius: 14px;
+  color: #c700c7;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+
+/* Stage2 안에서 원하는 위치에 배치 */
+.clock-wrapper {
+  position: absolute;
+  top: 300px;        /* 원하는 만큼 조정 */
+  left: 300px;
+  width: 300px;
+  height: 300px;
+}
+
+.clock-base {
+  width: 100%;
+  height: 100%;
+}
+
+.hand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: 50% 90%;
+  transform: translate(-50%, -90%) rotate(0deg);
+}
+
+.minute-hand {
+  width: 20px;
+  height: 160px;
+}
+
+.second-hand {
+  width: 15px;
+     height: 180px;
+}
+

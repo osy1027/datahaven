@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url("assets/mini_bg.png");   /* ✔ FIXED */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* center everything */
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;  
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* character centered */
+        #character {
+            width: 1400px;
+            height: auto;
+            display: block;
+        }
+
+        /* default text position */
+        #textBox {
+            position: absolute;
+            top: 47%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        #textBox img {
+            width: 1200px;
+            height: auto;
+        }
+
+        /* ✨ sparkle image */
+        #sparkle {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1300px;
+            pointer-events: none;
+            z-index: 20;
+            animation: sparkleBlink 1.4s infinite ease-in-out;
+        }
+
+        /* ✨ sparkle animation */
+        @keyframes sparkleBlink {
+            0%   { opacity: 0; transform: translateX(-50%) scale(0.9); }
+            50%  { opacity: 1; transform: translateX(-50%) scale(1.1); }
+            100% { opacity: 0; transform: translateX(-50%) scale(0.9); }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+
+        <!-- ✨ sparkle image -->
+        <img id="sparkle" src="assets/sparkle.png" alt="sparkle">
+
+        <!-- TEXT OVERLAY -->
+        <div id="textBox">
+            <img id="textImage" src="assets/text1.png" alt="text">
+        </div>
+
+        <!-- CHARACTER IMAGE -->
+        <img id="character" src="assets/heartcharacter.png" alt="character">
+
+    </div>
+
+    <script>
+        const textImages = [
+            "assets/text1.png",
+            "assets/text2.png",
+            "assets/text3.png"
+        ];
+
+        let currentIndex = 0;
+
+        const textBox = document.getElementById("textBox");
+        const textImage = document.getElementById("textImage");
+
+        document.body.addEventListener("click", () => {
+            currentIndex++;
+
+            if (currentIndex < textImages.length) {
+                textImage.src = textImages[currentIndex];
+
+                /* text2 위치 변경 */
+                if (currentIndex === 1) {
+                    textBox.style.top = "40%";
+                    textBox.style.left = "60%";
+                    textBox.style.transform = "translateX(-50%)";
+                } else {
+                    textBox.style.top = "47%";
+                    textBox.style.left = "50%";
+                    textBox.style.transform = "translateX(-50%)";
+                }
+
+            } else {
+                window.location.href = "stage2.html"; 
+            }
+        });
+    </script>
+
+</body>
+</html>

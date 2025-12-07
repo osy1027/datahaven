@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>클래식 미로 탈출 게임</title>
+  <style>
+    body {
+      background: #222;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 10px;
+      text-align: center;
+    }
+    canvas {
+      margin-top: 10px;
+      border: 2px solid #eee;
+      background: #111;
+      image-rendering: pixelated;
+      max-width: 100vw;
+      max-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <h2>클래식 미로 탈출 게임</h2>
+  <p>이동: 방향키 또는 WASD</p>
+
+  <canvas id="game"></canvas>
+
+  <script>
+    const tileSize = 32;
+
+    // # = 벽, . = 길, S = 시작, E = 가짜 출구, R = 진짜 출구
+    // 크고 가지 많은 (31 x 31) 미로
+  const maze = [
+"#####################",
+"#S....#............E#",
+"###.#.#.####.#.#####.#",
+"#...#.#.#....#.....#.#",
+"#.###.#.#.########.#.#",
+"#.#...#.#....#.....#.#",
+"#.#.###.####.#.#####.#",
+"#.#.#.....#..#.......#",
+"#.#.#.###.#.###.#.###.#",
+"#.#.#.#.#.#.....#.#E.#",
+"#.#.#.#.#.#######.#.#.#",
+"#.#.#.#.#.......#...#.#",
+"#E#.#.#.#########.#.#.#",
+"#.....#.......#...#.#.#",
+"###.#.#######.#.###.#.#",
+"#...#.......#.#.....R.#",
+"#####################"
+];
+
+    const rows = maze.length;
+    const cols = maze[0].length;
+
+    const canvas = document.getElementById("game");
+    canvas.width = cols * tileSize;
+    canvas.height = rows * tileSize;
+    const ctx = canvas.getContext("2d");
+
+    let player = {
+      x: 0,
+      y: 0,
+      size: tileSize * 0.45
+    };
+
+    let start = { x: 0, y: 0 };
+    const fakeExits = [];
+    let realExit = null;
+    const guards = [];
+
+    // 맵 파싱: 시작점, 출구들 찾기
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const ch = maze[r][c];
+        const cx = (c + 0.5) * tileSize;
+        const cy = (r + 0.5) * tileSize;
+
+        if (ch === "S") {
+          player.x = cx;
+          player.y = cy;
+          start.x = cx;
+          start.y = cy;
+        } else if (ch === "E") {
+          fakeExits.push({ col: c, row: r, cx, cy });
+        } else if (ch === "R") {
+          realExit = { col: c, row: r, cx, cy };
+        }
+      }
+    }
+
+    // 가짜 출구마다 적(경비) 생성
+    // 적은 출구 앞 통로에서 좌우로 왔다 갔다
+    fakeExits.forEach(ex => {
+      guards.push({
+        exit: ex,
+        active: false,
+        x: ex.cx - tileSize,        // 출구 왼쪽에서 시작
+        y: ex.cy,
+        width: tileSize * 0.75,
+        height: tileSize * 0.55,
+        minX: ex.cx - tileSize,     // 좌우 이동 범위
+        maxX: ex.cx + tileSize,
+        dir: 1,
+        speed: 1.8,
+        triggerRadius: tileSize * 1.3 // "진짜 근처"에서만 등장
+      });
+    });
+
+    const keys = {};
+    window.addEventListener("keydown", e => (keys[e.key] = true));
+    window.addEventListener("keyup", e => (keys[e.key] = false));
+
+    function isWall(px, py) {
+      const c = Math.floor(px / tileSize);
+      const r = Math.floor(py / tileSize);
+      if (c < 0 || c >= cols || r < 0 || r >= rows) return true;
+      return maze[r][c] === "#";
+    }
+
+    function update() {
+      const speed = 2.1;
+
+      let vx =
+        (keys.a || keys.ArrowLeft ? -1 : 0) +
+        (keys.d || keys.ArrowRight ? 1 : 0);
+      let vy =
+        (keys.w || keys.ArrowUp ? -1 : 0) +
+        (keys.s || keys.ArrowDown ? 1 : 0);
+
+      // 대각선 속도 보정
+      if (vx !== 0 && vy !== 0) {
+        vx *= Math.SQRT1_2;
+        vy *= Math.SQRT1_2;
+      }
+
+      const prevX = player.x;
+      const prevY = player.y;
+      const half = player.size / 2;
+
+      // X 이동
+      let nx = player.x + vx * speed;
+      if (
+        !isWall(nx - half, player.y - half) &&
+        !isWall(nx + half, player.y - half) &&
+        !isWall(nx - half, player.y + half) &&
+        !isWall(nx + half, player.y + half)
+      ) {
+        player.x = nx;
+      }
+
+      // Y 이동
+      let ny = player.y + vy * speed;
+      if (
+        !isWall(player.x - half, ny - half) &&
+        !isWall(player.x + half, ny - half) &&
+        !isWall(player.x - half, ny + half) &&
+        !isWall(player.x + half, ny + half)
+      ) {
+        player.y = ny;
+      }
+
+      // 가짜 출구 근처에 "진짜로 가까이" 갔을 때만 적 활성화
+      guards.forEach(g => {
+        const dx = player.x - g.exit.cx;
+        const dy = player.y - g.exit.cy;
+        const d = Math.hypot(dx, dy);
+
+        if (!g.active && d < g.triggerRadius) {
+          g.active = true;
+        }
+
+        if (g.active) {
+          g.x += g.dir * g.speed;
+          if (g.x < g.minX) {
+            g.x = g.minX;
+            g.dir = 1;
+          } else if (g.x > g.maxX) {
+            g.x = g.maxX;
+            g.dir = -1;
+          }
+        }
+      });
+
+      // 적과 충돌하면 이동 무효
+      for (const g of guards) {
+        if (!g.active) continue;
+        if (
+          player.x + half > g.x &&
+          player.x - half < g.x + g.width &&
+          player.y + half > g.y &&
+          player.y - half < g.y + g.height
+        ) {
+          player.x = prevX;
+          player.y = prevY;
+        }
+      }
+
+      // 가짜 출구 도달 → 시작점으로 리셋
+      fakeExits.forEach(ex => {
+        const d = Math.hypot(player.x - ex.cx, player.y - ex.cy);
+        if (d < tileSize * 0.35) {
+          alert("가짜 출구입니다! 다시 시작점으로 돌아갑니다.");
+          player.x = start.x;
+          player.y = start.y;
+        }
+      });
+
+      // 진짜 출구 도달 → 클리어
+      if (realExit) {
+        const d = Math.hypot(player.x - realExit.cx, player.y - realExit.cy);
+        if (d < tileSize * 0.35) {
+          alert("탈출 성공! 🎉");
+          player.x = start.x;
+          player.y = start.y;
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 타일 그리기
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const ch = maze[r][c];
+          const x = c * tileSize;
+          const y = r * tileSize;
+
+          ctx.fillStyle = ch === "#" ? "#333" : "#111";
+          ctx.fillRect(x, y, tileSize, tileSize);
+
+          if (ch === "S") ctx.fillStyle = "#2ecc71";
+          if (ch === "E") ctx.fillStyle = "#3498db";
+          if (ch === "R") ctx.fillStyle = "#f1c40f";
+
+          if ("SER".includes(ch)) {
+            ctx.fillRect(x + 6, y + 6, tileSize - 12, tileSize - 12);
+          }
+        }
+      }
+
+      // 경비
+      guards.forEach(g => {
+        if (!g.active) return;
+        ctx.fillStyle = "#e74c3c";
+        ctx.fillRect(g.x, g.y, g.width, g.height);
+      });
+
+      // 플레이어
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>

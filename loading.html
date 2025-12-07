@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: black; 
+        }
+
+        /* 중앙 정렬 */
+        #loading-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 로딩 이미지 */
+        .loading-icon {
+            width: 220px;
+            animation: pulse 1.8s infinite ease-in-out;
+        }
+
+        /* 맥동 애니메이션 */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+
+        /* 화면 전체 페이드인 */
+        .fade-in {
+            animation: fadeIn 1.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+
+</head>
+
+<body class="fade-in">
+
+    <div id="loading-container">
+        <img src="assets/loading.png" class="loading-icon">
+    </div>
+
+<script>
+    // 3초 후 userps.html 로 이동
+    setTimeout(() => {
+        window.location.href = "userps.html";
+    }, 3000);
+</script>

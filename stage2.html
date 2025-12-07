@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Stage 2</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url("assets/mini_bg.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+        }
+
+        .stage2-wrapper {
+            position: relative;
+            width: 1600px;
+            height: 1000px;
+            margin: 0 auto;
+        }
+
+        .stage-bg {
+            width: 100%;
+            position: absolute;
+            top: 10px;
+            left: 0;
+            z-index: 1;
+        }
+
+        .section {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            z-index: 5;
+        }
+
+        input.real-input {
+            opacity: 0;
+            position: absolute;
+            width: 200px;
+            pointer-events: auto;
+            border: none;
+            outline: none;
+        }
+
+        .fake-text {
+            position: absolute;
+            width: 200px;
+            font-size: 14px;
+            color: #ef8ec7;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .caret {
+            width: 2px;
+            height: 1em;
+            background: #ef8ec7;
+            margin-left: 3px;
+            animation: blink 0.7s steps(1) infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .submit-btn {
+            width: 70px;
+            height: 30px;
+            opacity: 0;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+        }
+
+        .doubt {
+            color:#ef8ec7;
+            font-size:14px;
+            width: 250px;
+            line-height: 1.4;
+            position: absolute;
+        }
+
+        .hint {
+            color:#ef8ec7;
+            font-size:14px;
+            width:350px;
+            line-height:1.4;
+            position:absolute;
+        }
+
+        .hidden { display:none; }
+
+        .crazy {
+            animation: crazyShake 0.4s infinite,
+                       crazyPulse 1s infinite alternate,
+                       crazyGlow 1.2s infinite alternate;
+        }
+
+        @keyframes crazyShake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(3deg); }
+            50% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes crazyPulse {
+            0% { font-size: 15px; }
+            100% { font-size: 25px; }
+        }
+        @keyframes crazyGlow {
+            0% { text-shadow: 0 0 4px #ff6bff; }
+            100% { text-shadow: 0 0 12px #ff00ea, 0 0 20px #ff73ff; }
+        }
+
+        .fade-out { animation: fadeOut 0.7s forwards; }
+        @keyframes fadeOut { to { opacity:0; } }
+    </style>
+</head>
+
+<body>
+
+<div class="stage2-wrapper">
+
+    <img src="assets/stage2bg.png" class="stage-bg">
+
+    <!-- ⭐ 질문 1 -->
+    <div class="section" id="q1" style="top: 250px; left: 350px;">
+
+        <p id="q1doubt" class="doubt"
+           style="top:-22px; left:440px;">
+           어서 빨리 알려줘!<br>기다리고 있단 말이야!
+        </p>
+
+        <div id="q1fake" class="fake-text" style="top:17px; left:120px;">
+            <span class="text"></span><span class="caret"></span>
+        </div>
+
+        <input id="q1input" class="real-input"
+               style="top:17px; left:120px;">
+
+        <button id="q1btn" class="submit-btn"
+                style="top:65px; left:140px;"></button>
+
+        <p id="q1hint" class="hint"
+           style="top:170px; left:700px;">
+           네가 뭘 좋아하는지<br>너무 궁금해!
+        </p>
+    </div>
+
+
+   <!-- ⭐ 질문 2 -->
+<div class="section hidden" id="q2" style="top: 480px; left: 350px;">
+
+    <p id="q2doubt" class="doubt"
+       style="top:-250px; left:440px;">
+       어서 빨리 알려줘!<br>기다리고 있단 말이야!
+    </p>
+
+    <div id="q2fake" class="fake-text" style="top:-30px; left:120px;">
+        <span class="text"></span><span class="caret"></span>
+    </div>
+
+    <!-- ⛔ 기존에는 top:17px 이었음 → ❗ fake와 동일한 위치로 변경 -->
+    <input id="q2input" class="real-input"
+           style="top:-30px; left:120px;">
+
+    <button id="q2btn" class="submit-btn"
+            style="top:35px; left:140px;"></button>
+
+    <p id="q2hint" class="hint"
+       style="top:-60px; left:700px;">
+       네가 뭘 좋아하는지<br>너무 궁금해!
+    </p>
+</div>
+
+
+
+    <!-- ⭐ 질문 3 -->
+    <div class="section hidden" id="q3" style="top: 710px; left: 350px;">
+
+        <p id="q3doubt" class="doubt"
+           style="top:-480px; left:440px;">
+           어서 빨리 알려줘!<br>기다리고 있단 말이야!
+        </p>
+
+        <div id="q3fake" class="fake-text" style="top:-60px; left:120px;">
+            <span class="text"></span><span class="caret"></span>
+        </div>
+
+        <input id="q3input" class="real-input"
+               style="top:-60px; left:120px;">
+
+        <button id="q3btn" class="submit-btn"
+                style="top:-10px; left:140px;"></button>
+
+        <p id="q3hint" class="hint"
+           style="top:-280px; left:700px;">
+           네가 뭘 좋아하는지<br>너무 궁금해!
+        </p>
+    </div>
+
+    <audio id="wrongSound" src="assets/wrong.mp3"></audio>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const wrongSound = document.getElementById("wrongSound");
+
+    function bindFake(inputId, fakeId) {
+        const input = document.getElementById(inputId);
+        const t = document.querySelector(`#${fakeId} .text`);
+
+        input.addEventListener("input", () => t.textContent = input.value);
+        document.getElementById(fakeId).addEventListener("click", () => input.focus());
+    }
+
+    bindFake("q1input", "q1fake");
+    bindFake("q2input", "q2fake");
+    bindFake("q3input", "q3fake");
+
+    const attempts = { q1:0, q2:0, q3:0 };
+
+    const hintsMap = {
+        q1: [
+            ["앞글자는 ‘두’. 디저트", "느낌 나는 단어야!"],
+            ["‘두바이’와 관련 있어.", "도시 이름이 들어가!"],
+            ["쫀득쫀득한 식감…", "이제 정말 다 왔어."],
+            ["거의 다 왔어!", "두바이쫀득쿠키!"]
+        ],
+        q2: [
+            ["‘로’로 시작해.", "라면 느낌 나는 음식이야."],
+            ["매운 라면 계열.", "불닭 계열!"],
+            ["불닭 + 납작당면.", "힌트 거의 다 줬다…"],
+            ["마지막 힌트!", "로제불닭납작당면!"]
+        ],
+        q3: [
+            ["걸그룹 노래.", "요즘 뜨는 팀!"],
+            ["그룹명은 아일릿!", "귀엽지 않다고 주장해."],
+            ["‘낫 큐트’ 느낌.", "거의 다 왔어."],
+            ["마지막 힌트!", "아일릿의 ‘낫 큐트’!"]
+        ]
+    };
+
+    const doubtMessages = [
+        ["그게 네 취향이 맞아…?", "나 좀 의심되는데?"],
+        ["또 틀렸어…", "취향 다시 생각해야 해"],
+        ["계속 틀리네…", "너 나 놀리는 거 아니지?"],
+        ["이 정도면 말이야…", "취향 조사 들어간다"]
+    ];
+
+    /* ⭐ 정답/오답 처리 */
+    function handleQuestion(key, inputEl, correct, nextStep) {
+        const doubtEl = document.getElementById(key + "doubt");
+        const hintEl  = document.getElementById(key + "hint");
+
+        const value = inputEl.value.trim();
+        if (!value) return;
+
+        /* ⭐ 정답 */
+        if (value === correct) {
+            doubtEl.classList.add("hidden");
+
+            hintEl.innerHTML = "정답! 😆<br>너 정말 잘 맞췄다!";
+            hintEl.classList.remove("hidden");
+            hintEl.classList.add("crazy");
+
+            /* 🔥 3초 후 정답 효과 사라짐 */
+            setTimeout(() => {
+                hintEl.classList.remove("crazy");
+                hintEl.classList.add("hidden");
+
+                if(nextStep) nextStep();
+            }, 3000);
+
+            return;
+        }
+
+        /* ❌ 오답 */
+        wrongSound.currentTime = 0;
+        wrongSound.play();
+
+        attempts[key]++;
+
+        const [d1,d2] = doubtMessages[(attempts[key]-1) % doubtMessages.length];
+        const [h1,h2] = hintsMap[key][Math.min(attempts[key]-1, hintsMap[key].length-1)];
+
+        doubtEl.innerHTML = `${d1}<br>${d2}`;
+        hintEl.innerHTML  = `${h1}<br>${h2}`;
+
+        doubtEl.classList.remove("hidden");
+        hintEl.classList.remove("hidden");
+    }
+
+    document.getElementById("q1btn").addEventListener("click", () => {
+        handleQuestion(
+            "q1",
+            document.getElementById("q1input"),
+            "두바이쫀득쿠키",
+            () => document.getElementById("q2").classList.remove("hidden")
+        );
+    });
+
+    document.getElementById("q2btn").addEventListener("click", () => {
+        handleQuestion(
+            "q2",
+            document.getElementById("q2input"),
+            "로제불닭납작당면",
+            () => document.getElementById("q3").classList.remove("hidden")
+        );
+    });
+
+    document.getElementById("q3btn").addEventListener("click", () => {
+        handleQuestion(
+            "q3",
+            document.getElementById("q3input"),
+            "아일릿의 낫 큐트",
+            () => {
+                document.body.classList.add("fade-out");
+                setTimeout(()=>location.href="stage3.html",700);
+            }
+        );
+    });
+
+});
+</script>
+</body>
+</html>
