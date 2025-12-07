@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Stage 2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dongle&display=swap" rel="stylesheet">
 
     <style>
+        .dongle-regular {
+            font-family: "Dongle", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -12,7 +21,8 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            font-family: Arial, sans-serif;
+            font-family: dongle;
+
         }
 
         .stage2-wrapper {
@@ -128,7 +138,7 @@
 
     <img src="assets/stage2bg.png" class="stage-bg">
 
-    <!-- ⭐ 질문 1 -->
+    <!— ⭐ 질문 1 —>
     <div class="section" id="q1" style="top: 250px; left: 350px;">
 
         <p id="q1doubt" class="doubt"
@@ -136,12 +146,12 @@
            어서 빨리 알려줘!<br>기다리고 있단 말이야!
         </p>
 
-        <div id="q1fake" class="fake-text" style="top:17px; left:120px;">
-            <span class="text"></span><span class="caret"></span>
+        <div id="q1fake" class="fake-text" style="top:0px; left:120px;">
+            <span class="text" id="q1text"></span><span class="caret"></span>
         </div>
 
         <input id="q1input" class="real-input"
-               style="top:17px; left:120px;">
+               style="top:0px; left:120px;">
 
         <button id="q1btn" class="submit-btn"
                 style="top:65px; left:140px;"></button>
@@ -162,7 +172,7 @@
     </p>
 
     <div id="q2fake" class="fake-text" style="top:-30px; left:120px;">
-        <span class="text"></span><span class="caret"></span>
+        <span class="text" id="q2text"></span><span class="caret"></span>
     </div>
 
     <!-- ⛔ 기존에는 top:17px 이었음 → ❗ fake와 동일한 위치로 변경 -->
@@ -183,13 +193,13 @@
     <!-- ⭐ 질문 3 -->
     <div class="section hidden" id="q3" style="top: 710px; left: 350px;">
 
-        <p id="q3doubt" class="doubt"
+        <p id="q3doubt" class="doubt dongle-regular"
            style="top:-480px; left:440px;">
            어서 빨리 알려줘!<br>기다리고 있단 말이야!
         </p>
 
         <div id="q3fake" class="fake-text" style="top:-60px; left:120px;">
-            <span class="text"></span><span class="caret"></span>
+            <span class="text" id="q3text"></span><span class="caret"></span>
         </div>
 
         <input id="q3input" class="real-input"
@@ -210,6 +220,7 @@
 
 
 <script>
+    console.log('ffdfdfdfsd')
 document.addEventListener("DOMContentLoaded", () => {
 
     const wrongSound = document.getElementById("wrongSound");
@@ -227,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bindFake("q3input", "q3fake");
 
     const attempts = { q1:0, q2:0, q3:0 };
+    
 
     const hintsMap = {
         q1: [
@@ -287,7 +299,39 @@ document.addEventListener("DOMContentLoaded", () => {
         wrongSound.currentTime = 0;
         wrongSound.play();
 
+        // 10번 틀렸을 시 인풋 막히고 자동으로 저 span 안에 있던 걸 다 지우고 타이핑효과처럼 한글자 한글자 나오게 해줘
+        function autoWrite(span, text, input) {
+            console.log(span, text)
+            const speed = 200;
+            span.textContent = "";
+
+            // 타이핑 효과: 문자열을 한 글자씩 추가
+            const chars = Array.from(String(text));
+            let index = 0;
+
+            function typeNext() {
+                if (index < chars.length) {
+                    span.textContent += chars[index]; // 누적 렌더링
+                    index++;
+                    setTimeout(typeNext, speed); // 속도 조절
+                }
+            }
+
+            typeNext();
+            input.value = text;
+        }
+
         attempts[key]++;
+        console.log(attempts.q1, attempts.q2, attempts.q3)
+        if (attempts.q1 === 10) {
+            autoWrite(document.getElementById('q1text'), answers[0], document.getElementById('q1input'));
+        }
+        if (attempts.q2 === 10) {
+            autoWrite(document.getElementById('q2text'), answers[1], document.getElementById('q2input'));
+        }
+        if (attempts.q3 === 10) {
+            autoWrite(document.getElementById('q3text'), answers[2], document.getElementById('q3input'));
+        }
 
         const [d1,d2] = doubtMessages[(attempts[key]-1) % doubtMessages.length];
         const [h1,h2] = hintsMap[key][Math.min(attempts[key]-1, hintsMap[key].length-1)];
@@ -299,11 +343,13 @@ document.addEventListener("DOMContentLoaded", () => {
         hintEl.classList.remove("hidden");
     }
 
+    const answers = ["두바이쫀득쿠키", "로제불닭납작당면", "아일릿의 낫 큐트"];
+
     document.getElementById("q1btn").addEventListener("click", () => {
         handleQuestion(
             "q1",
             document.getElementById("q1input"),
-            "두바이쫀득쿠키",
+            answers[0],
             () => document.getElementById("q2").classList.remove("hidden")
         );
     });
@@ -312,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
         handleQuestion(
             "q2",
             document.getElementById("q2input"),
-            "로제불닭납작당면",
+            answers[1],
             () => document.getElementById("q3").classList.remove("hidden")
         );
     });
@@ -321,7 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
         handleQuestion(
             "q3",
             document.getElementById("q3input"),
-            "아일릿의 낫 큐트",
+            answers[2],
             () => {
                 document.body.classList.add("fade-out");
                 setTimeout(()=>location.href="stage3.html",700);
