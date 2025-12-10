@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Stage 2</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Dongle&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dongle&display=swap" rel="stylesheet">
 
     <style>
         .dongle-regular {
@@ -22,7 +22,6 @@
             background-position: center;
             background-repeat: no-repeat;
             font-family: dongle;
-
         }
 
         .stage2-wrapper {
@@ -60,7 +59,6 @@
             position: absolute;
             width: 200px;
             font-size: 25px;
-            color: #ef8ec7;
             display: flex;
             align-items: center;
             user-select: none;
@@ -129,6 +127,32 @@
 
         .fade-out { animation: fadeOut 0.7s forwards; }
         @keyframes fadeOut { to { opacity:0; } }
+/* ⭐⭐⭐ fake-text 색 다르게 적용 ⭐⭐⭐ */
+
+/* 질문 1 fake text + cursor */
+#q1fake .text {
+    color: #81619f;
+}
+#q1fake .caret {
+    background: #81619f;
+}
+
+/* 질문 2 fake text + cursor */
+#q2fake .text {
+    color: #f572be;
+}
+#q2fake .caret {
+    background: #f572be;
+}
+
+/* 질문 3 fake text + cursor */
+#q3fake .text {
+    color: #628ecc;
+}
+#q3fake .caret {
+    background: #628ecc;
+}
+
     </style>
 </head>
 
@@ -138,7 +162,7 @@
 
     <img src="assets/stage2bg.png" class="stage-bg">
 
-    <!— ⭐ 질문 1 —>
+    <!-- ⭐ 질문 1 -->
     <div class="section" id="q1" style="top: 250px; left: 350px;">
 
         <p id="q1doubt" class="doubt"
@@ -163,31 +187,29 @@
     </div>
 
 
-   <!-- ⭐ 질문 2 -->
-<div class="section hidden" id="q2" style="top: 480px; left: 350px;">
+    <!-- ⭐ 질문 2 -->
+    <div class="section hidden" id="q2" style="top: 480px; left: 350px;">
 
-    <p id="q2doubt" class="doubt"
-       style="top:-250px; left:440px;">
-       어서 빨리 알려줘!<br>기다리고 있단 말이야!
-    </p>
+        <p id="q2doubt" class="doubt"
+           style="top:-250px; left:440px;">
+           어서 빨리 알려줘!<br>기다리고 있단 말이야!
+        </p>
 
-    <div id="q2fake" class="fake-text" style="top:-30px; left:120px;">
-        <span class="text" id="q2text"></span><span class="caret"></span>
+        <div id="q2fake" class="fake-text" style="top:-38px; left:120px;">
+            <span class="text" id="q2text"></span><span class="caret"></span>
+        </div>
+
+        <input id="q2input" class="real-input"
+               style="top:-30px; left:120px;">
+
+        <button id="q2btn" class="submit-btn"
+                style="top:35px; left:140px;"></button>
+
+        <p id="q2hint" class="hint"
+           style="top:-74px; left:700px;">
+           네가 뭘 좋아하는지<br>너무 궁금해!
+        </p>
     </div>
-
-    <!-- ⛔ 기존에는 top:17px 이었음 → ❗ fake와 동일한 위치로 변경 -->
-    <input id="q2input" class="real-input"
-           style="top:-30px; left:120px;">
-
-    <button id="q2btn" class="submit-btn"
-            style="top:35px; left:140px;"></button>
-
-    <p id="q2hint" class="hint"
-       style="top:-70px; left:700px;">
-       네가 뭘 좋아하는지<br>너무 궁금해!
-    </p>
-</div>
-
 
 
     <!-- ⭐ 질문 3 -->
@@ -198,7 +220,7 @@
            어서 빨리 알려줘!<br>기다리고 있단 말이야!
         </p>
 
-        <div id="q3fake" class="fake-text" style="top:-60px; left:120px;">
+        <div id="q3fake" class="fake-text" style="top:-76px; left:120px;">
             <span class="text" id="q3text"></span><span class="caret"></span>
         </div>
 
@@ -209,7 +231,7 @@
                 style="top:-10px; left:140px;"></button>
 
         <p id="q3hint" class="hint"
-           style="top:-280px; left:700px;">
+           style="top:-300px; left:700px;">
            네가 뭘 좋아하는지<br>너무 궁금해!
         </p>
     </div>
@@ -220,7 +242,6 @@
 
 
 <script>
-    console.log('ffdfdfdfsd')
 document.addEventListener("DOMContentLoaded", () => {
 
     const wrongSound = document.getElementById("wrongSound");
@@ -238,7 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
     bindFake("q3input", "q3fake");
 
     const attempts = { q1:0, q2:0, q3:0 };
-    
 
     const hintsMap = {
         q1: [
@@ -268,7 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ["이 정도면 말이야…", "취향 조사 들어간다"]
     ];
 
-    /* ⭐ 정답/오답 처리 */
     function handleQuestion(key, inputEl, correct, nextStep) {
         const doubtEl = document.getElementById(key + "doubt");
         const hintEl  = document.getElementById(key + "hint");
@@ -276,7 +295,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const value = inputEl.value.trim();
         if (!value) return;
 
-        /* ⭐ 정답 */
         if (value === correct) {
             doubtEl.classList.add("hidden");
 
@@ -284,7 +302,6 @@ document.addEventListener("DOMContentLoaded", () => {
             hintEl.classList.remove("hidden");
             hintEl.classList.add("crazy");
 
-            /* 🔥 3초 후 정답 효과 사라짐 */
             setTimeout(() => {
                 hintEl.classList.remove("crazy");
                 hintEl.classList.add("hidden");
@@ -295,25 +312,20 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        /* ❌ 오답 */
         wrongSound.currentTime = 0;
         wrongSound.play();
 
-        // 10번 틀렸을 시 인풋 막히고 자동으로 저 span 안에 있던 걸 다 지우고 타이핑효과처럼 한글자 한글자 나오게 해줘
         function autoWrite(span, text, input) {
-            console.log(span, text)
             const speed = 200;
             span.textContent = "";
-
-            // 타이핑 효과: 문자열을 한 글자씩 추가
             const chars = Array.from(String(text));
             let index = 0;
 
             function typeNext() {
                 if (index < chars.length) {
-                    span.textContent += chars[index]; // 누적 렌더링
+                    span.textContent += chars[index];
                     index++;
-                    setTimeout(typeNext, speed); // 속도 조절
+                    setTimeout(typeNext, speed);
                 }
             }
 
@@ -322,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         attempts[key]++;
-        console.log(attempts.q1, attempts.q2, attempts.q3)
+
         if (attempts.q1 === 10) {
             autoWrite(document.getElementById('q1text'), answers[0], document.getElementById('q1input'));
         }

@@ -2,251 +2,217 @@
 <head>
 <meta charset="UTF-8" />
 <title>Stage 4 – Folder Sort Game (Multi-Falling)</title>
+  <style>
+    body {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: start;
+      justify-content: center;
+    }
+    .bg {
+      width: 1250px;
+      height: auto;
+      object-fit: contain;
+    }
+    .emotion-img {
+      position: absolute;
+      transform: translateX(-94px) translateY(168px);
+      width: 255px;
+      height: 175px;
+      /* background-color: aqua; */
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    .emotion-img > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-<style>
-  body {
-    background: #ffe7ff;
-    display: flex;
-    justify-content: center;
-    padding-top: 40px;
-    font-family: 'Arial';
-  }
+    /* ———————————— */
+    /* ★ Range Input 스타일링 ★ */
+    /* ———————————— */
 
-  .stage4-bg {
-    width: 100%;
-    position: relative;
-    top: 0;
-    z-index: 1;
-  }
+    .slider-wrap {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) translateY(525px);
+      width: 400px;
+    }
 
-  #stage4Canvas {
-    position: absolute;
-    top: 170px;
-    left: 375px;
-    width: 700px;
-    height: 700px;
-    background: transparent;
-    z-index: 5;
-  }
+    .slider-img {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) translateY(500px);
+      width: 430px;
+      height: auto;
+      pointer-events: none;
+    }
+    .slider-img > img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
 
-  .bucket-container {
-    position: absolute;
-    top: 780px;
-    left: 375px;
-    width: 700px;
-    display: flex;
-    justify-content: space-between;
-    z-index: 10;
-  }
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      background: transparent;
+      border-radius: 4px;
+      outline: none;
+    }
 
-  .bucket {
-    width: 140px;
-    height: 140px;
-    border: 4px solid #ffffff;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.8);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow: hidden;
-  }
+    /* 실제 드래그 가능한 영역은 작게 유지 */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 40px;     /* 실제 잡히는 영역 */
+      height: 40px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+    }
 
-  .bucket img {
-    width: 500px;
-    height: 500px;
-  }
+    /* 실제 thumb 안에 큰 이미지처럼 보이게 하는 가짜 요소 */
+    input[type="range"]::-webkit-slider-thumb::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 400px;      /* 시각적으로 보이는 크기 */
+      height: 400px;
+      transform: translate(-50%, -50%);
+      background: url('/assets/button.png') no-repeat center center;
+      background-size: contain;
+      pointer-events: none;
+    }
 
-  #scoreText {
-    position:absolute;
-    top:130px;
-    left:380px;
-    font-size:32px;
-    font-weight:bold;
-    z-index:99;
-    color:#000;
-  }
-</style>
+    /* Firefox용 */
+    input[type="range"]::-moz-range-thumb {
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+    }
+
+    input[type="range"]::-moz-range-thumb::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 400px;
+      height: 400px;
+      transform: translate(-50%, -50%);
+      background: url('/assets/button.png') no-repeat center center;
+      background-size: contain;
+      pointer-events: none;
+    }
+  </style>
 </head>
-
 <body>
+  <!-- 전체화면 이미지 -->
+  <img class="bg" src="/assets/spectrum.png" />
 
-<div id="scoreText">Score: 0 / 7</div>
-
-<div id="container">
-  <div id="frame16x9">
-
-      <img src="assets/basicbg.png" class="stage4-bg">
-
-      <canvas id="stage4Canvas" width="700" height="700"></canvas>
-
-      <div class="bucket-container">
-        <div class="bucket" data-bucket="1"><img src="assets/folder1.png"></div>
-        <div class="bucket" data-bucket="2"><img src="assets/folder2.png"></div>
-        <div class="bucket" data-bucket="3"><img src="assets/folder3.png"></div>
-        <div class="bucket" data-bucket="4"><img src="assets/folder4.png"></div>
-        <div class="bucket" data-bucket="5"><img src="assets/folder5.png"></div>
-      </div>
-
+  <!-- 감정 이미지 -->
+  <div class="emotion-img">
+    <img src="/assets/boomeok.webp" />
   </div>
-</div>
 
-<script>
-/* -----------------------------------------------------------
-   Multi-Falling Folder Game with Drag Support
-   (BIG + SLOW FALLING + 7 SCORE GAME END)
------------------------------------------------------------ */
+  <!-- 슬라이더 이미지 -->
+  <div class="slider-img">
+    <img src="/assets/stick.png" />
+  </div>
+  <!-- 슬라이더 -->
+  <div class="slider-wrap">
+    <input id="emotion-range" type="range" min="0" max="100" value="50" />
+  </div>
 
-const canvas = document.getElementById("stage4Canvas");
-const ctx = canvas.getContext("2d");
+  <script>
+    const emotionImgUrls = ['boomeok.webp', 'bug1.avif', 'mint.webp'];
+    let idx = 0;
 
-let folderImages = [];
-let folders = []; 
-let successCount = 0;
-let gameRunning = true;
+    function reset() {
+      const emotionImg = document.querySelector('.emotion-img img');
 
-/* LOAD IMAGES */
-for (let i = 1; i <= 5; i++) {
-  const img = new Image();
-  img.src = `assets/folder${i}.png`;
-  folderImages[i] = img;
-}
+      // 슬라이더 이동시키기
+      const slider = document.getElementById('emotion-range');
+      let start = parseInt(slider.value);
+      let end = 100;
+      let duration = 600; // 0.6초
+      let startTime = null;
 
-/* CREATE ONE FALLING FOLDER */
-function createFolder() {
-  return {
-    id: Math.floor(Math.random() * 5) + 1,  // random folder1~5
-    x: Math.random() * 250 + 20,            // random start x
-    y: -300 - Math.random() * 500,          // start far above screen
-    speed: 0.7 + Math.random() * 0.5,       // SLOW falling speed
-    dragging: false,
-    offsetX: 0,
-    offsetY: 0
-  };
-}
+      function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = (timestamp - startTime) / duration;
 
-/* START WITH 4 FALLING FOLDERS (GOOD BALANCE) */
-for (let i = 0; i < 4; i++) {
-  folders.push(createFolder());
-}
+        const value = start + (end - start) * Math.min(progress, 1);
+        slider.value = value;
 
-/* DRAW ALL FOLDERS */
-function draw() {
-  ctx.clearRect(0, 0, 700, 700);
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          // 100% 도달 후: 다음 단계 실행
+          idx += 1;
+          if (idx > 2) {
+            window.location.href = '/index.html';
+            return;
+          }
 
-  folders.forEach(f => {
-    ctx.drawImage(folderImages[f.id], f.x, f.y, 350, 350); // BIG SIZE
-  });
-}
+          const newUrl = `/assets/${emotionImgUrls[idx]}`;
+          emotionImg.src = newUrl;
 
-/* UPDATE POSITIONS */
-function update() {
-  if (!gameRunning) return;
-
-  folders.forEach(f => {
-    if (!f.dragging) f.y += f.speed; // apply gravity unless dragging
-
-    // BOTTOM CHECK
-    if (f.y >= 380) {
-      checkBucket(f);
-    }
-  });
-}
-
-/* GAME LOOP */
-function loop() {
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-/* MOUSE POSITION HELPER */
-function getMousePos(evt) {
-  const rect = canvas.getBoundingClientRect();
-  return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
-}
-
-/* DRAG START */
-canvas.addEventListener("mousedown", (e) => {
-  const mouse = getMousePos(e);
-
-  // Top-most folder first
-  for (let i = folders.length - 1; i >= 0; i--) {
-    const f = folders[i];
-
-    if (
-      mouse.x >= f.x &&
-      mouse.x <= f.x + 350 &&
-      mouse.y >= f.y &&
-      mouse.y <= f.y + 350
-    ) {
-      f.dragging = true;
-      f.offsetX = mouse.x - f.x;
-      f.offsetY = mouse.y - f.y;
-      return;
-    }
-  }
-});
-
-/* DRAG MOVE */
-canvas.addEventListener("mousemove", (e) => {
-  const mouse = getMousePos(e);
-
-  folders.forEach(f => {
-    if (f.dragging) {
-      f.x = mouse.x - f.offsetX;
-      f.y = mouse.y - f.offsetY;
-    }
-  });
-});
-
-/* DRAG END */
-canvas.addEventListener("mouseup", () => {
-  folders.forEach(f => f.dragging = false);
-});
-
-/* BUCKET CHECK */
-function checkBucket(folder) {
-  const buckets = document.querySelectorAll(".bucket");
-  const canvasRect = canvas.getBoundingClientRect();
-
-  const fx = folder.x + canvasRect.left + 175;
-  const fy = folder.y + canvasRect.top + 175;
-
-  buckets.forEach(bucket => {
-    const rect = bucket.getBoundingClientRect();
-    const bucketNum = Number(bucket.getAttribute("data-bucket"));
-
-    if (fx >= rect.left && fx <= rect.right && fy >= rect.top && fy <= rect.bottom) {
-
-      // CORRECT MATCH
-      if (folder.id === bucketNum) {
-        successCount++;
-        document.getElementById("scoreText").innerText =
-          `Score: ${successCount} / 7`;
-
-        // WIN CONDITION
-        if (successCount >= 7) {
-          gameRunning = false;
-          alert("🎉 YOU WIN! 🎉");
-          return;
+          // 슬라이더 초기화
+          setTimeout(() => {
+            slider.value = 50;
+            slider.disabled = false;
+          }, 300);
         }
       }
 
-      // remove and replace folder
-      folders.splice(folders.indexOf(folder), 1);
-      folders.push(createFolder());
+      requestAnimationFrame(animate);
     }
-  });
 
-  /* IF FOLDER FALLS OUT OF SCREEN → RESPAWN */
-  if (folder.y > 900) {
-    folders.splice(folders.indexOf(folder), 1);
-    folders.push(createFolder());
-  }
-}
+    const slider = document.getElementById('emotion-range');
+    let releaseTimer = null;
 
-loop(); // START GAME
-</script>
+    // 드래그 중에는 아무 동작 없음
+    slider.addEventListener('input', () => {
+      console.log("dragging:", slider.value);
 
+      // 드래그 중이면 기존 타이머 초기화 (유저가 계속 움직이면 reset 지연됨)
+      if (releaseTimer) {
+        clearTimeout(releaseTimer);
+        releaseTimer = null;
+      }
+    });
+
+    // 손을 떼는 순간 실행되는 이벤트
+    slider.addEventListener('pointerup', () => {
+      console.log("released!", idx);
+
+      // 1초 후 reset
+      releaseTimer = setTimeout(() => {
+        slider.disabled = true;
+        reset();
+
+        // reset 후 슬라이더 초기화
+        
+        slider.value = 50;
+
+        setTimeout(() => {
+          slider.disabled = false;
+        }, 500);
+
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
