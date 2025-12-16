@@ -4,10 +4,19 @@
     <meta charset="UTF-8">
     <title>Intro</title>
 
-    <!-- 공통 배경 스타일 -->
     <link rel="stylesheet" href="css/global.css">
 
     <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+
+            background: url("assets/mini_bg.png") center / cover no-repeat;
+        }
+
         #container {
             width: 100vw;
             height: 100vh;
@@ -20,101 +29,147 @@
             width: 90vw;
             aspect-ratio: 16 / 9;
             position: relative;
+
+            /* ✅ title 안 잘리게 */
+            overflow: visible;
         }
 
-        .intro-bg {
-            max-width: 120%;
-            max-height: 120%;
-            object-fit: contain;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
-
-       /* 제목 이미지 */
         .title-image {
             position: absolute;
-            top: -10%;       /* 위쪽 여백 */
-            left: 50%;
+            top: -25%;
+            left: 25%;
             transform: translateX(-50%);
-            width: 110%;     /* 적당한 크기 */
+            width: 80%;
             pointer-events: none;
         }
 
-         .intro-character {
-            max-width: 110%;
-            max-height: 130%;
+        .intro-character {
+            max-width: 95%;
+            max-height: 115%;
             object-fit: contain;
             position: absolute;
-            bottom: -50px;
-            right: -30px;
+            bottom: -60px;
+            right: -270px;
             pointer-events: none;
         }
 
+        .start-button {
+            position: absolute;
+            bottom:40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1750px;
+            cursor: pointer;
+            overflow: hidden;
+            animation: shakeY 0.8s ease-in-out infinite;
+        }
 
-        /* START 버튼 이미지 */
-      /* 반짝이는 shimmer 효과 */
-.start-button {
-    position: absolute;
-    bottom: 0%;
-    left: 45%;
-    transform: translateX(-50%);
-    width: 1500px;
-    cursor: pointer;
-    transition: 0.2s;
-    overflow: hidden; /* 강조 */
-}
+        @keyframes shakeY {
+            0%   { transform: translateX(-50%) translateY(0); }
+            25%  { transform: translateX(-50%) translateY(2px); }
+            50%  { transform: translateX(-50%) translateY(0); }
+            75%  { transform: translateX(-50%) translateY(-2px); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
 
-.start-button::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(
-        120deg,
-        rgba(255,255,255,0) 0%,
-        rgba(255,255,255,0.6) 50%,
-        rgba(255,255,255,0) 100%
-    );
-    animation: shine 2.5s infinite;
-}
+        .start-button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.6) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: shine 2.5s infinite;
+        }
 
-@keyframes shine {
-    0% { left: -100%; }
-    60% { left: 150%; }
-    100% { left: 150%; }
-}
+        @keyframes shine {
+            0% { left: -100%; }
+            60% { left: 150%; }
+            100% { left: 150%; }
+        }
 
+        .bubble-heart {
+            position: absolute;
+            bottom: -60px;
+            pointer-events: none;
+            opacity: 0.7;
+            animation-name: floatUp;
+            animation-timing-function: linear;
+        }
 
+        @keyframes floatUp {
+            from {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            to {
+                transform: translateY(-120vh);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-    <div id="container">
-        <div id="frame16x9">
+<div id="container">
+    <div id="frame16x9">
 
-            <img src="assets/mini_bg.png" class="intro-bg">
+        <img src="assets/title.png" class="title-image">
 
-            <img src="assets/title.png" class="title-image">
+        <img src="assets/intro_character.png"
+             class="intro-character"
+             id="introCharacter">
 
-            <img src="assets/intro_character.png" class="intro-character">
+        <img src="assets/start_btn.png"
+             class="start-button"
+             onclick="startGame()">
 
-            <!-- ★ 이미지 START 버튼 -->
-            <img src="assets/start_btn.png" class="start-button" onclick="startGame()">
-
-        </div>
     </div>
+</div>
 
-    <script>
-        function startGame() {
-            window.location.href = "stage1.html";
-        }
-    </script>
+<script>
+    function startGame() {
+        window.location.href = "stage1.html";
+    }
+
+    const characterImages = [
+        "assets/intro_character.png",
+        "assets/characterclosing.png"
+    ];
+
+    let currentIndex = 0;
+    const characterImg = document.getElementById("introCharacter");
+
+    setInterval(() => {
+        currentIndex = (currentIndex + 1) % characterImages.length;
+        characterImg.src = characterImages[currentIndex];
+    }, 500);
+
+    const frame = document.getElementById("frame16x9");
+
+    function createBubbleHeart() {
+        const heart = document.createElement("img");
+        heart.src = "assets/transparentheart.png";
+        heart.className = "bubble-heart";
+
+        const size = Math.random() * 80 + 60;
+        heart.style.width = size + "px";
+        heart.style.left = Math.random() * 100 + "%";
+        heart.style.animationDuration = (Math.random() * 4 + 4) + "s";
+
+        frame.appendChild(heart);
+        heart.addEventListener("animationend", () => heart.remove());
+    }
+
+    setInterval(createBubbleHeart, 600);
+</script>
 
 </body>
 </html>

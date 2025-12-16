@@ -1,218 +1,294 @@
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<title>Stage 4 – Folder Sort Game (Multi-Falling)</title>
-  <style>
-    body {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      align-items: start;
-      justify-content: center;
-    }
-    .bg {
-      width: 1250px;
-      height: auto;
-      object-fit: contain;
-    }
-    .emotion-img {
-      position: absolute;
-      transform: translateX(-94px) translateY(168px);
-      width: 255px;
-      height: 175px;
-      /* background-color: aqua; */
-      border-radius: 15px;
-      overflow: hidden;
-    }
-    .emotion-img > img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+<title>Stage 4 – Emotion Spectrum</title>
 
-    /* ———————————— */
-    /* ★ Range Input 스타일링 ★ */
-    /* ———————————— */
+<style>
+body {
+  margin: 0;
+  background: url("/assets/mini_bg.png") no-repeat center / cover;
+  font-family: system-ui, sans-serif;
+}
 
-    .slider-wrap {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%) translateY(525px);
-      width: 400px;
-    }
+.stage-wrapper {
+  position: relative;
+  width: 1600px;
+  height: 1000px;
+  margin: 0 auto;
+}
 
-    .slider-img {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%) translateY(500px);
-      width: 430px;
-      height: auto;
-      pointer-events: none;
-    }
-    .slider-img > img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      pointer-events: none;
-    }
+.stage-bg {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  z-index: 1;
+}
 
-    input[type="range"] {
-      width: 100%;
-      height: 8px;
-      background: transparent;
-      border-radius: 4px;
-      outline: none;
-    }
+.stage-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
 
-    /* 실제 드래그 가능한 영역은 작게 유지 */
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 40px;     /* 실제 잡히는 영역 */
-      height: 40px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      position: relative;
-    }
+.emotion-img {
+  position: absolute;
+  transform: translate(525px, 225px);
+  width: 305px;
+  height: 225px;
+  border-radius: 15px;
+  overflow: hidden;
+}
 
-    /* 실제 thumb 안에 큰 이미지처럼 보이게 하는 가짜 요소 */
-    input[type="range"]::-webkit-slider-thumb::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 400px;      /* 시각적으로 보이는 크기 */
-      height: 400px;
-      transform: translate(-50%, -50%);
-      background: url('/assets/button.png') no-repeat center center;
-      background-size: contain;
-      pointer-events: none;
-    }
+.emotion-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-    /* Firefox용 */
-    input[type="range"]::-moz-range-thumb {
-      width: 40px;
-      height: 40px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      position: relative;
-    }
+.slider-wrap {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 670px);
+  width: 400px;
+}
 
-    input[type="range"]::-moz-range-thumb::before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 400px;
-      height: 400px;
-      transform: translate(-50%, -50%);
-      background: url('/assets/button.png') no-repeat center center;
-      background-size: contain;
-      pointer-events: none;
-    }
-  </style>
+input[type="range"] {
+  width: 100%;
+  background: transparent;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+
+input[type="range"]::-webkit-slider-thumb::before {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: url('/assets/button.png') no-repeat center / contain;
+}
+
+.wrong-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.wrong-overlay img {
+  width: 300px;
+}
+
+.bubble-overlay {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  display: none;
+  z-index: 11;
+}
+
+.bubble-text {
+  max-width: 280px;
+  padding: 18px 22px;
+  background: #fff;
+  border-radius: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+</style>
 </head>
+
 <body>
-  <!-- 전체화면 이미지 -->
-  <img class="bg" src="/assets/spectrum.png" />
 
-  <!-- 감정 이미지 -->
-  <div class="emotion-img">
-    <img src="/assets/boomeok.webp" />
+<div class="stage-wrapper">
+  <img src="/assets/spectrum.png" class="stage-bg" />
+
+  <div class="stage-content">
+    <div class="emotion-img">
+      <img src="/assets/boomeok.webp" />
+    </div>
+
+    <div class="slider-wrap">
+      <input id="emotion-range" type="range" min="0" max="100" value="50" />
+    </div>
+
+    <div class="wrong-overlay">
+      <img src="/assets/wrong.png" />
+    </div>
+
+    <div class="bubble-overlay">
+      <div class="bubble-text"></div>
+    </div>
+
+    <audio id="wrong-sound" src="/assets/wrong.mp3"></audio>
   </div>
+</div>
 
-  <!-- 슬라이더 이미지 -->
-  <div class="slider-img">
-    <img src="/assets/stick.png" />
-  </div>
-  <!-- 슬라이더 -->
-  <div class="slider-wrap">
-    <input id="emotion-range" type="range" min="0" max="100" value="50" />
-  </div>
+<script>
+/* ===================== */
+/* STATE */
+/* ===================== */
+const emotionImgUrls = ['boomeok.webp', 'bug1.avif', 'mint.webp'];
+let idx = 0;
 
-  <script>
-    const emotionImgUrls = ['boomeok.webp', 'bug1.avif', 'mint.webp'];
-    let idx = 0;
+let attempt = 0;
+const MAX_ATTEMPT = 3;
 
-    function reset() {
-      const emotionImg = document.querySelector('.emotion-img img');
+const bubbleMessages = [
+  "아니야. 다시 한 번 생각해봐.",
+  "아직도 아니야. 천천히 골라도 돼.",
+  "이제 충분히 봤어. 내가 정리할게."
+];
 
-      // 슬라이더 이동시키기
-      const slider = document.getElementById('emotion-range');
-      let start = parseInt(slider.value);
-      let end = 100;
-      let duration = 600; // 0.6초
-      let startTime = null;
+const slider = document.getElementById('emotion-range');
 
-      function animate(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const progress = (timestamp - startTime) / duration;
+/* ===================== */
+/* EASING */
+/* ===================== */
+function easeInOutCubic(t) {
+  return t < 0.5
+    ? 4 * t * t * t
+    : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
-        const value = start + (end - start) * Math.min(progress, 1);
-        slider.value = value;
+/* ===================== */
+/* WRONG FEEDBACK */
+/* ===================== */
+function showWrongFeedback() {
+  const wrong = document.querySelector('.wrong-overlay');
+  const bubble = document.querySelector('.bubble-overlay');
+  const text = document.querySelector('.bubble-text');
+  const sound = document.getElementById('wrong-sound');
 
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          // 100% 도달 후: 다음 단계 실행
-          idx += 1;
-          if (idx > 2) {
-            window.location.href = '/index.html';
-            return;
-          }
+  text.textContent = bubbleMessages[Math.min(attempt, bubbleMessages.length - 1)];
 
-          const newUrl = `/assets/${emotionImgUrls[idx]}`;
-          emotionImg.src = newUrl;
+  wrong.style.display = 'flex';
+  bubble.style.display = 'block';
 
-          // 슬라이더 초기화
-          setTimeout(() => {
-            slider.value = 50;
-            slider.disabled = false;
-          }, 300);
-        }
-      }
+  sound.currentTime = 0;
+  sound.play();
 
+  setTimeout(() => {
+    wrong.style.display = 'none';
+    bubble.style.display = 'none';
+    slider.disabled = false;
+  }, 1500);
+}
+
+/* ===================== */
+/* SOFT ADVANCE (CORRECT) */
+/* ===================== */
+function advanceNormally() {
+  const emotionImg = document.querySelector('.emotion-img img');
+
+  idx++;
+  if (idx >= emotionImgUrls.length) {
+    window.location.href = "/index.html";
+    return;
+  }
+
+  emotionImg.src = `/assets/${emotionImgUrls[idx]}`;
+
+  setTimeout(() => {
+    slider.value = 50;
+    slider.disabled = false;
+  }, 300);
+}
+
+/* ===================== */
+/* FINAL FORCE ADJUST */
+/* ===================== */
+function forceCorrectAnswer() {
+  const emotionImg = document.querySelector('.emotion-img img');
+  const start = +slider.value;
+  const end = 100;
+
+  const steps = [start, 65, 58, 92, 104, 100];
+  let phase = 0;
+  let startTime = null;
+  const phaseDuration = 900;
+
+  slider.disabled = true;
+
+  function animate(ts) {
+    if (!startTime) startTime = ts;
+    const t = Math.min((ts - startTime) / phaseDuration, 1);
+
+    const from = steps[phase];
+    const to = steps[phase + 1];
+
+    slider.value = from + (to - from) * easeInOutCubic(t);
+
+    if (t < 1) {
       requestAnimationFrame(animate);
-    }
+    } else {
+      phase++;
+      startTime = ts;
 
-    const slider = document.getElementById('emotion-range');
-    let releaseTimer = null;
+      if (phase < steps.length - 1) {
+        setTimeout(() => requestAnimationFrame(animate), 250);
+      } else {
+        slider.value = end;
+        attempt = 0;
 
-    // 드래그 중에는 아무 동작 없음
-    slider.addEventListener('input', () => {
-      console.log("dragging:", slider.value);
+        idx++;
+        if (idx >= emotionImgUrls.length) {
+          window.location.href = "/index.html";
+          return;
+        }
 
-      // 드래그 중이면 기존 타이머 초기화 (유저가 계속 움직이면 reset 지연됨)
-      if (releaseTimer) {
-        clearTimeout(releaseTimer);
-        releaseTimer = null;
-      }
-    });
-
-    // 손을 떼는 순간 실행되는 이벤트
-    slider.addEventListener('pointerup', () => {
-      console.log("released!", idx);
-
-      // 1초 후 reset
-      releaseTimer = setTimeout(() => {
-        slider.disabled = true;
-        reset();
-
-        // reset 후 슬라이더 초기화
-        
-        slider.value = 50;
-
+        emotionImg.src = `/assets/${emotionImgUrls[idx]}`;
         setTimeout(() => {
+          slider.value = 50;
           slider.disabled = false;
-        }, 500);
+        }, 600);
+      }
+    }
+  }
 
-      }, 1000);
-    });
-  </script>
+  requestAnimationFrame(animate);
+}
+
+/* ===================== */
+/* INPUT */
+/* ===================== */
+slider.addEventListener('pointerup', () => {
+  const value = +slider.value;
+  slider.disabled = true;
+
+  // ✅ 정답: 즉시 통과 (보정 없음)
+  if (value >= 95) {
+    attempt = 0;
+    advanceNormally();
+    return;
+  }
+
+  // ❌ 오답
+  attempt++;
+
+  if (attempt < MAX_ATTEMPT) {
+    showWrongFeedback();
+  } else {
+    showWrongFeedback();
+    setTimeout(forceCorrectAnswer, 1800);
+  }
+});
+</script>
+
 </body>
 </html>

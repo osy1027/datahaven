@@ -9,13 +9,12 @@
         body {
             margin: 0;
             padding: 0;
-            background-image: url("assets/mini_bg.png");   /* ✔ FIXED */
+            background-image: url("assets/mini_bg.png");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
 
-        /* center everything */
         #container {
             width: 100vw;
             height: 100vh;
@@ -25,14 +24,12 @@
             align-items: center;
         }
 
-        /* character centered */
         #character {
             width: 1400px;
             height: auto;
             display: block;
         }
 
-        /* default text position */
         #textBox {
             position: absolute;
             top: 47%;
@@ -47,7 +44,6 @@
             height: auto;
         }
 
-        /* ✨ sparkle image */
         #sparkle {
             position: absolute;
             top: 10%;
@@ -59,56 +55,70 @@
             animation: sparkleBlink 1.4s infinite ease-in-out;
         }
 
-        /* ✨ sparkle animation */
         @keyframes sparkleBlink {
             0%   { opacity: 0; transform: translateX(-50%) scale(0.9); }
             50%  { opacity: 1; transform: translateX(-50%) scale(1.1); }
             100% { opacity: 0; transform: translateX(-50%) scale(0.9); }
         }
-
     </style>
 </head>
 
 <body>
 
-    <div id="container">
+<div id="container">
 
-        <!-- ✨ sparkle image -->
-        <img id="sparkle" src="assets/sparkle.png" alt="sparkle">
+    <img id="sparkle" src="assets/sparkle.png" alt="sparkle">
 
-        <!-- TEXT OVERLAY -->
-        <div id="textBox">
-            <img id="textImage" src="assets/text1.png" alt="text">
-        </div>
-
-        <!-- CHARACTER IMAGE -->
-        <img id="character" src="assets/heartcharacter.png" alt="character">
-
+    <div id="textBox">
+        <img id="textImage" src="assets/text1.png" alt="text">
     </div>
 
-    <script>
-        const textImages = [
-            "assets/text1.png",
-            "assets/text2.png",
-            "assets/text3.png"
-        ];
+    <img id="character" src="assets/heartcharacter.png" alt="character">
 
-        let currentIndex = 0;
+</div>
 
-        const textBox = document.getElementById("textBox");
-        const textImage = document.getElementById("textImage");
+<script>
+    const textImages = [
+        "assets/text1.png",
+        "assets/text2.png",
+        "assets/text3.png"
+    ];
 
-        document.body.addEventListener("click", () => {
-            currentIndex++;
+    // 세로 위치 (top)
+    const textTops = [
+        "47%",   // text1
+        "48%",   // text2 ← 세로 위치
+        "46.3%"    // text3
+    ];
 
-            if (currentIndex < textImages.length) {
-                textImage.src = textImages[currentIndex];
+    // 가로 위치 (left)
+    const textLefts = [
+        "50%",   // text1
+        "52%",   // text2 ← 가로 위치 조정 HERE
+        "50%"    // text3
+    ];
 
-            } else {
-                window.location.href = "stage2.html"; 
-            }
-        });
-    </script>
+    let currentIndex = 0;
+
+    const textBox = document.getElementById("textBox");
+    const textImage = document.getElementById("textImage");
+
+    function updateText(index) {
+        textImage.src = textImages[index];
+        textBox.style.top = textTops[index];
+        textBox.style.left = textLefts[index];
+    }
+
+    document.body.addEventListener("click", () => {
+        currentIndex++;
+
+        if (currentIndex < textImages.length) {
+            updateText(currentIndex);
+        } else {
+            window.location.href = "stage2.html";
+        }
+    });
+</script>
 
 </body>
 </html>
