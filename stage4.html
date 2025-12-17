@@ -7,7 +7,7 @@
 <style>
 body {
   margin: 0;
-  background: url("./assets/mini_bg.png") no-repeat center / cover;
+  background: url("assets/mini_bg.png") no-repeat center / cover;
   font-family: system-ui, sans-serif;
 }
 
@@ -121,11 +121,11 @@ input[type="range"]::-moz-range-thumb {
 <body>
 
 <div class="stage-wrapper">
-  <img src="./assets/spectrum.png" class="stage-bg" />
+  <img src="assets/spectrum.png" class="stage-bg" />
 
   <div class="stage-content">
     <div class="emotion-img">
-      <img src="./assets/img1.png" />
+      <img src="assets/img1.png" />
     </div>
 
     <div class="emotion-text" id="emotion-text">
@@ -137,14 +137,14 @@ input[type="range"]::-moz-range-thumb {
     </div>
 
     <div class="wrong-overlay">
-      <img src="./assets/wrong.png" />
+      <img src="assets/wrong.png" />
     </div>
 
-    <audio id="wrong-sound" src="./assets/wrong.mp3"></audio>
+    <audio id="wrong-sound" src="assets/wrong.mp3"></audio>
   </div>
 </div>
 
-<audio id="bgm" src="./assets/cute.mp3" loop muted></audio>
+<audio id="bgm" src="assets/cute.mp3" loop muted></audio>
 
 <script>
 /* BGM */
@@ -163,8 +163,10 @@ let bgToggle = false;
 
 setInterval(() => {
   stageBg.src = bgToggle
-    ? './assets/spectrum.png'
-    : './assets/spectrum2.png';
+    ? 'assets/spectrum.png'
+    : '
+    
+    assets/spectrum2.png';
   bgToggle = !bgToggle;
 }, 1000);
 
@@ -226,7 +228,7 @@ function advanceNormally() {
   idx++;
 
   document.querySelector('.emotion-img img').src =
-    `./assets/${emotionImgUrls[idx]}`;
+    `assets/${emotionImgUrls[idx]}`;
 
   textEl.innerHTML = emotionTexts[idx];
 
