@@ -8,7 +8,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-image: url("assets/mini_bg.png");
+  background-image: url("./assets/mini_bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -66,21 +66,22 @@ body {
 <body>
 
 <div class="stage2-wrapper">
-  <img src="/assets/layoutmaze.png" class="stage-bg" id="stageBg">
+  <img src="./assets/layoutmaze.png" class="stage-bg" id="stageBg">
   <div class="cheer-text" id="cheerText"></div>
   <div class="maze-wrapper">
     <canvas id="game"></canvas>
   </div>
 </div>
 
-<audio id="bgm" src="assets/cute.mp3" autoplay muted loop></audio>
+<audio id="bgm" src="./assets/cute.mp3" loop muted></audio>
 
 <script>
 const __bgm = document.getElementById("bgm");
-__bgm.addEventListener("loadedmetadata", () => {
+document.addEventListener("click", () => {
   __bgm.currentTime = 40;
-  setTimeout(() => __bgm.muted = false, 120);
-});
+  __bgm.muted = false;
+  __bgm.play();
+}, { once: true });
 </script>
 
 <script>
@@ -100,20 +101,19 @@ const floorColor = "#d150b3";
 
 /* ===== IMAGES ===== */
 const playerImg = new Image();
-playerImg.src = "/assets/star.png";
+playerImg.src = "./assets/star.png";
 
-/* ✅ ADDED : faceicon guard */
 const guardImg = new Image();
-guardImg.src = "/assets/faceicon2p.png";
+guardImg.src = "./assets/faceicon2p.png";
 
 const realExitImg = new Image();
-realExitImg.src = "/assets/square.png";
+realExitImg.src = "./assets/square.png";
 
 const fakeExitImages = [
-  "/assets/circle.png",
-  "/assets/triangle.png",
-  "/assets/polygon.png",
-  "/assets/square.png"
+  "./assets/circle.png",
+  "./assets/triangle.png",
+  "./assets/polygon.png",
+  "./assets/square.png"
 ].map(src => {
   const img = new Image();
   img.src = src;
@@ -155,8 +155,6 @@ let player = { x: 0, y: 0 };
 let start = { x: 0, y: 0 };
 const fakeExits = [];
 let realExit = null;
-
-/* ✅ ADDED : guards */
 const guards = [];
 
 /* ===== PARSE MAP ===== */
@@ -179,7 +177,6 @@ for (let r = 0; r < rows; r++) {
   }
 }
 
-/* ✅ ADDED : guard setup (원래 네 코드 그대로) */
 fakeExits.forEach(ex => {
   guards.push({
     exit: ex,
@@ -208,7 +205,7 @@ function isWall(px, py) {
   return maze[r][c] === "#";
 }
 
-/* ===== UPDATE ===== */
+/* ===== UPDATE / DRAW / LOOP ===== */
 let flickerFrame = 0;
 let playerVisible = true;
 
@@ -217,7 +214,6 @@ function update() {
   let vx = (keys.a || keys.ArrowLeft ? -1 : 0) + (keys.d || keys.ArrowRight ? 1 : 0);
   let vy = (keys.w || keys.ArrowUp ? -1 : 0) + (keys.s || keys.ArrowDown ? 1 : 0);
 
-  /* ✅ ADDED : flicker */
   if (vx || vy) {
     flickerFrame++;
     if (flickerFrame % 6 === 0) playerVisible = !playerVisible;
@@ -251,7 +247,6 @@ function update() {
     player.y = ny;
   }
 
-  /* ✅ ADDED : guard movement */
   guards.forEach(g => {
     const d = Math.hypot(player.x - g.exit.cx, player.y - g.exit.cy);
     if (!g.active && d < g.triggerRadius) g.active = true;
@@ -261,7 +256,6 @@ function update() {
     }
   });
 
-  /* ✅ ADDED : guard blocking */
   guards.forEach(g => {
     if (!g.active) return;
     if (
@@ -275,7 +269,6 @@ function update() {
     }
   });
 
-  /* ✅ ADDED : fake exit reset */
   fakeExits.forEach(ex => {
     if (Math.hypot(player.x - ex.cx, player.y - ex.cy) < tileSize * 0.35) {
       alert("가짜 출구입니다! 다시 시작합니다.");
@@ -291,20 +284,16 @@ function update() {
   }
 }
 
-/* ===== DRAW ===== */
 function drawMaze() {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const x = c * tileSize;
       const y = r * tileSize;
+      ctx.fillStyle = maze[r][c] === "#" ? "#ff9ef8" : "#d150b3";
+      ctx.fillRect(x, y, tileSize, tileSize);
       if (maze[r][c] === "#") {
-        ctx.fillStyle = wallColor;
-        ctx.fillRect(x, y, tileSize, tileSize);
-        ctx.strokeStyle = wallStroke;
+        ctx.strokeStyle = "#e293c4";
         ctx.strokeRect(x, y, tileSize, tileSize);
-      } else {
-        ctx.fillStyle = floorColor;
-        ctx.fillRect(x, y, tileSize, tileSize);
       }
     }
   }
@@ -314,42 +303,37 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawMaze();
 
-  let eIndex = 0;
-  fakeExits.forEach(ex => {
-    const img = fakeExitImages[eIndex % fakeExitImages.length];
-    ctx.drawImage(img, ex.cx - fakeExitSize / 2, ex.cy - fakeExitSize / 2, fakeExitSize, fakeExitSize);
-    eIndex++;
+  fakeExits.forEach((ex, i) => {
+    ctx.drawImage(fakeExitImages[i % fakeExitImages.length],
+      ex.cx - fakeExitSize / 2,
+      ex.cy - fakeExitSize / 2,
+      fakeExitSize, fakeExitSize);
   });
 
   if (realExit) {
-    ctx.drawImage(realExitImg, realExit.cx - realExitSize / 2, realExit.cy - realExitSize / 2, realExitSize, realExitSize);
+    ctx.drawImage(realExitImg,
+      realExit.cx - realExitSize / 2,
+      realExit.cy - realExitSize / 2,
+      realExitSize, realExitSize);
   }
 
-  /* ✅ ADDED : draw guards */
   guards.forEach(g => {
     if (g.active) {
-      ctx.drawImage(
-        guardImg,
+      ctx.drawImage(guardImg,
         g.x + (g.width - guardW) / 2,
         g.y + (g.height - guardH) / 2,
-        guardW,
-        guardH
-      );
+        guardW, guardH);
     }
   });
 
   if (playerVisible) {
-    ctx.drawImage(
-      playerImg,
+    ctx.drawImage(playerImg,
       player.x - playerSize / 2,
       player.y - playerSize / 2,
-      playerSize,
-      playerSize
-    );
+      playerSize, playerSize);
   }
 }
 
-/* ===== LOOP ===== */
 function loop() {
   update();
   draw();
@@ -358,10 +342,9 @@ function loop() {
 loop();
 
 /* ===== BACKGROUND TOGGLE ===== */
-const bgImages = ["/assets/layoutmaze.png", "/assets/layoutmaze2.png"];
+const bgImages = ["./assets/layoutmaze.png", "./assets/layoutmaze2.png"];
 let bgIndex = 0;
 const stageBg = document.getElementById("stageBg");
-
 setInterval(() => {
   bgIndex = (bgIndex + 1) % bgImages.length;
   stageBg.src = bgImages[bgIndex];
