@@ -8,7 +8,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-image: url("./assets/mini_bg.png");
+  background-image: url("assets/mini_bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -66,14 +66,14 @@ body {
 <body>
 
 <div class="stage2-wrapper">
-  <img src="./assets/layoutmaze.png" class="stage-bg" id="stageBg">
+  <img src="assets/layoutmaze.png" class="stage-bg" id="stageBg">
   <div class="cheer-text" id="cheerText"></div>
   <div class="maze-wrapper">
     <canvas id="game"></canvas>
   </div>
 </div>
 
-<audio id="bgm" src="./assets/cute.mp3" loop muted></audio>
+<audio id="bgm" src="assets/cute.mp3" loop muted></audio>
 
 <script>
 const __bgm = document.getElementById("bgm");
@@ -101,19 +101,19 @@ const floorColor = "#d150b3";
 
 /* ===== IMAGES ===== */
 const playerImg = new Image();
-playerImg.src = "./assets/star.png";
+playerImg.src = "assets/star.png";
 
 const guardImg = new Image();
-guardImg.src = "./assets/faceicon2p.png";
+guardImg.src = "assets/faceicon2p.png";
 
 const realExitImg = new Image();
-realExitImg.src = "./assets/square.png";
+realExitImg.src = "assets/square.png";
 
 const fakeExitImages = [
-  "./assets/circle.png",
-  "./assets/triangle.png",
-  "./assets/polygon.png",
-  "./assets/square.png"
+  "assets/circle.png",
+  "assets/triangle.png",
+  "assets/polygon.png",
+  "assets/square.png"
 ].map(src => {
   const img = new Image();
   img.src = src;
@@ -342,7 +342,7 @@ function loop() {
 loop();
 
 /* ===== BACKGROUND TOGGLE ===== */
-const bgImages = ["./assets/layoutmaze.png", "./assets/layoutmaze2.png"];
+const bgImages = ["assets/layoutmaze.png", "assets/layoutmaze2.png"];
 let bgIndex = 0;
 const stageBg = document.getElementById("stageBg");
 setInterval(() => {
