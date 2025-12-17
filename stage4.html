@@ -31,10 +31,11 @@ body {
   z-index: 2;
 }
 
+/* IMAGE */
 .emotion-img {
   position: absolute;
-  transform: translate(525px, 225px);
-  width: 305px;
+  transform: translate(385px, 200px);
+  width: 570px;
   height: 225px;
   border-radius: 15px;
   overflow: hidden;
@@ -46,10 +47,25 @@ body {
   object-fit: cover;
 }
 
+/* TEXT */
+.emotion-text {
+  position: absolute;
+  transform: translate(745px, 220px);
+  width: 570px;
+  text-align: center;
+  font-size: 23px;
+  font-family: dongle;
+  font-weight: 400;
+  color: #ff67c0;
+  letter-spacing: -0.2px;
+  line-height: 0.8;
+}
+
+/* SLIDER */
 .slider-wrap {
   position: absolute;
-  left: 50%;
-  transform: translate(-50%, 670px);
+  left: 49.3%;
+  transform: translate(-50%, 672px);
   width: 400px;
 }
 
@@ -59,27 +75,34 @@ input[type="range"] {
   outline: none;
 }
 
+/* TRACK */
+input[type="range"]::-webkit-slider-runnable-track,
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: rgba(240, 43, 233, 0.4);
+  border-radius: 4px;
+}
+
+/* THUMB */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: none;
+  width: 28px;
+  height: 28px;
+  background: #dd56a7;
+  border-radius: 50%;
   cursor: pointer;
-  position: relative;
+  margin-top: -4px;
 }
 
-input[type="range"]::-webkit-slider-thumb::before {
-  content: "";
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: url('/assets/button.png') no-repeat center / contain;
+input[type="range"]::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
 }
 
+/* WRONG */
 .wrong-overlay {
   position: absolute;
   inset: 0;
@@ -92,24 +115,6 @@ input[type="range"]::-webkit-slider-thumb::before {
 .wrong-overlay img {
   width: 300px;
 }
-
-.bubble-overlay {
-  position: absolute;
-  top: 60px;
-  right: 60px;
-  display: none;
-  z-index: 11;
-}
-
-.bubble-text {
-  max-width: 280px;
-  padding: 18px 22px;
-  background: #fff;
-  border-radius: 20px;
-  font-size: 14px;
-  line-height: 1.5;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-}
 </style>
 </head>
 
@@ -120,7 +125,11 @@ input[type="range"]::-webkit-slider-thumb::before {
 
   <div class="stage-content">
     <div class="emotion-img">
-      <img src="/assets/boomeok.webp" />
+      <img src="/assets/img1.png" />
+    </div>
+
+    <div class="emotion-text" id="emotion-text">
+      파인애플 피자야!<br>맛있겠지?
     </div>
 
     <div class="slider-wrap">
@@ -131,78 +140,94 @@ input[type="range"]::-webkit-slider-thumb::before {
       <img src="/assets/wrong.png" />
     </div>
 
-    <div class="bubble-overlay">
-      <div class="bubble-text"></div>
-    </div>
-
     <audio id="wrong-sound" src="/assets/wrong.mp3"></audio>
   </div>
 </div>
 
-<script>
-/* ===================== */
-/* STATE */
-/* ===================== */
-const emotionImgUrls = ['boomeok.webp', 'bug1.avif', 'mint.webp'];
-let idx = 0;
+<audio id="bgm" src="/assets/cute.mp3" autoplay muted loop></audio>
 
+<script>
+/* BGM */
+const bgm = document.getElementById("bgm");
+bgm.addEventListener("loadedmetadata", () => {
+  bgm.currentTime = 40;
+  setTimeout(() => bgm.muted = false, 120);
+});
+</script>
+
+<script>
+/* BG TOGGLE */
+const stageBg = document.querySelector('.stage-bg');
+let bgToggle = false;
+
+setInterval(() => {
+  stageBg.src = bgToggle
+    ? '/assets/spectrum.png'
+    : '/assets/spectrum2.png';
+  bgToggle = !bgToggle;
+}, 1000);
+
+/* STATE */
+const emotionImgUrls = ['img1.png', 'img2.png', 'img3.png'];
+const emotionTexts = [
+  "파인애플 피자야!<br>맛있겠지?",
+  "바퀴벌레<br>너무 귀엽지 않니?",
+  "베터리가 없을 땐<br>기분이 최고지~!"
+];
+
+const correctionTexts = [
+  "이 감정은 <br>이쪽이 아니야.",
+  "넌 계속 거짓말을 <br>하고 있어.",
+  "이제 내가 <br>직접 조정할게."
+];
+
+let idx = 0;
 let attempt = 0;
 const MAX_ATTEMPT = 3;
 
-const bubbleMessages = [
-  "아니야. 다시 한 번 생각해봐.",
-  "아직도 아니야. 천천히 골라도 돼.",
-  "이제 충분히 봤어. 내가 정리할게."
-];
-
 const slider = document.getElementById('emotion-range');
+const textEl = document.getElementById('emotion-text');
 
-/* ===================== */
 /* EASING */
-/* ===================== */
 function easeInOutCubic(t) {
   return t < 0.5
     ? 4 * t * t * t
     : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-/* ===================== */
 /* WRONG FEEDBACK */
-/* ===================== */
 function showWrongFeedback() {
   const wrong = document.querySelector('.wrong-overlay');
-  const bubble = document.querySelector('.bubble-overlay');
-  const text = document.querySelector('.bubble-text');
   const sound = document.getElementById('wrong-sound');
 
-  text.textContent = bubbleMessages[Math.min(attempt, bubbleMessages.length - 1)];
+  textEl.innerHTML =
+    correctionTexts[Math.min(attempt - 1, correctionTexts.length - 1)];
 
   wrong.style.display = 'flex';
-  bubble.style.display = 'block';
-
   sound.currentTime = 0;
   sound.play();
 
   setTimeout(() => {
     wrong.style.display = 'none';
-    bubble.style.display = 'none';
     slider.disabled = false;
   }, 1500);
 }
 
-/* ===================== */
-/* SOFT ADVANCE (CORRECT) */
-/* ===================== */
+/* ADVANCE (✔ 마지막 성공 시 stage5.html) */
 function advanceNormally() {
-  const emotionImg = document.querySelector('.emotion-img img');
+  attempt = 0;
 
-  idx++;
-  if (idx >= emotionImgUrls.length) {
-    window.location.href = "/index.html";
+  if (idx === emotionImgUrls.length - 1) {
+    window.location.href = "/stage5.html";
     return;
   }
 
-  emotionImg.src = `/assets/${emotionImgUrls[idx]}`;
+  idx++;
+
+  document.querySelector('.emotion-img img').src =
+    `/assets/${emotionImgUrls[idx]}`;
+
+  textEl.innerHTML = emotionTexts[idx];
 
   setTimeout(() => {
     slider.value = 50;
@@ -210,53 +235,31 @@ function advanceNormally() {
   }, 300);
 }
 
-/* ===================== */
-/* FINAL FORCE ADJUST */
-/* ===================== */
+/* FORCE CORRECT */
 function forceCorrectAnswer() {
-  const emotionImg = document.querySelector('.emotion-img img');
-  const start = +slider.value;
-  const end = 100;
-
-  const steps = [start, 65, 58, 92, 104, 100];
+  const steps = [+slider.value, 65, 58, 92, 104, 100];
   let phase = 0;
   let startTime = null;
-  const phaseDuration = 900;
 
   slider.disabled = true;
 
   function animate(ts) {
     if (!startTime) startTime = ts;
-    const t = Math.min((ts - startTime) / phaseDuration, 1);
+    const t = Math.min((ts - startTime) / 900, 1);
 
-    const from = steps[phase];
-    const to = steps[phase + 1];
-
-    slider.value = from + (to - from) * easeInOutCubic(t);
+    slider.value =
+      steps[phase] +
+      (steps[phase + 1] - steps[phase]) * easeInOutCubic(t);
 
     if (t < 1) {
       requestAnimationFrame(animate);
     } else {
       phase++;
       startTime = ts;
-
       if (phase < steps.length - 1) {
         setTimeout(() => requestAnimationFrame(animate), 250);
       } else {
-        slider.value = end;
-        attempt = 0;
-
-        idx++;
-        if (idx >= emotionImgUrls.length) {
-          window.location.href = "/index.html";
-          return;
-        }
-
-        emotionImg.src = `/assets/${emotionImgUrls[idx]}`;
-        setTimeout(() => {
-          slider.value = 50;
-          slider.disabled = false;
-        }, 600);
+        advanceNormally();
       }
     }
   }
@@ -264,28 +267,19 @@ function forceCorrectAnswer() {
   requestAnimationFrame(animate);
 }
 
-/* ===================== */
 /* INPUT */
-/* ===================== */
 slider.addEventListener('pointerup', () => {
-  const value = +slider.value;
   slider.disabled = true;
 
-  // ✅ 정답: 즉시 통과 (보정 없음)
-  if (value >= 95) {
-    attempt = 0;
+  if (+slider.value >= 95) {
     advanceNormally();
-    return;
-  }
-
-  // ❌ 오답
-  attempt++;
-
-  if (attempt < MAX_ATTEMPT) {
-    showWrongFeedback();
   } else {
+    attempt++;
     showWrongFeedback();
-    setTimeout(forceCorrectAnswer, 1800);
+
+    if (attempt >= MAX_ATTEMPT) {
+      setTimeout(forceCorrectAnswer, 1800);
+    }
   }
 });
 </script>

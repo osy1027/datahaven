@@ -34,33 +34,17 @@ body {
 /* -------------------------
    버튼 이미지
 --------------------------*/
-#user-img {
-    position: absolute;
-    top: 23%;
-    left: 25%;
-    width: 50%;
-    z-index: 1;
-    pointer-events: none;
-    transition: transform 0.15s ease;
-}
-
-#psw-img {
-    position: absolute;
-    top: 26%;
-    left: 25%;
-    width: 50%;
-    z-index: 1;
-    pointer-events: none;
-}
-
+#user-img,
+#psw-img,
 #signup-img {
-    position: absolute;
-    top: -10%;
-    left: -10%;
-    width: 120%;
+    width: 100%;
+    pointer-events: none;
+}
+
+#user-img,
+#psw-img {
+    position: relative;
     z-index: 1;
-    cursor: pointer;
-    pointer-events: auto;
 }
 
 /* USERNAME 활성 */
@@ -70,7 +54,7 @@ body {
 }
 
 /* -------------------------
-   INPUT 공통 (caret 높이)
+   INPUT 공통
 --------------------------*/
 .input-field {
     position: absolute;
@@ -89,31 +73,56 @@ body {
     margin: 0;
 
     caret-color: #ef8ec7;
-
-    z-index: 5;
     pointer-events: auto;
+    width: 30%;
+    z-index: 1000;
 }
 
-/* -------------------------
-   caret 위치 개별 조정
---------------------------*/
-
-/* USERNAME 커서 (더 위) */
-#username {
-    top: 44.5%;
-    left: 22%;
-    width: 56%;
-
-    transform: translateY(-0.07em);
+.input-field:hover {
+    cursor: text;
 }
 
-/* PASSWORD 커서 (조금만 위) */
-#password {
-    top: 48%;
-    left: 22%;
-    width: 56%;
+.user-name-div {
+    width: 50%;
+    position: absolute;
+    top: 23%;
+    left: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    transform: translateY(-0.02em);
+.password-div {
+    width: 50%;
+    position: absolute;
+    top: 26%;
+    left: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.signup-div {
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.signup-button {
+    position: absolute;
+    transform: translateY(120%);
+    width: 8%;
+    height: 4%;
+    opacity: 0%;
+    pointer-events: auto;
+    cursor: pointer;
 }
 </style>
 </head>
@@ -124,16 +133,44 @@ body {
 
     <img src="assets/loginpage.png" class="panel" id="login-panel">
 
-    <img src="assets/usernamebutton.png" id="user-img">
-    <img src="assets/pswbutton.png" id="psw-img">
-    <img src="assets/signupbutton.png" id="signup-img" onclick="submitForm()">
+    <div class="user-name-div">
+        <img src="assets/usernamebutton.png" id="user-img">
+        <input type="text" id="username" class="input-field" autocomplete="off">
+    </div>
 
-    <input type="text" id="username" class="input-field" autocomplete="off">
-    <input type="password" id="password" class="input-field" autocomplete="off">
-
+    <div class="password-div">
+        <img src="assets/pswbutton.png" id="psw-img">
+        <input type="password" id="password" class="input-field" autocomplete="off">
+    </div>
+    
+    <div class="signup-div">
+        <img src="assets/signupbutton.png" id="signup-img">
+        <button class="signup-button" onclick="submitForm()"></button>
+    </div>
 </div>
 
+<!-- ✅ BGM (20초부터 자동 재생 / Mac Local) -->
+<audio
+    id="bgm"
+    src="assets/cute.mp3"
+    autoplay
+    loop
+></audio>
+
 <script>
+/* ---------- BGM : START AT 20s ---------- */
+const bgm = document.getElementById("bgm");
+
+bgm.addEventListener("canplaythrough", () => {
+    try {
+        if (bgm.currentTime < 20) {
+            bgm.currentTime = 20;
+        }
+        bgm.play();
+    } catch (e) {}
+}, { once: true });
+
+/* ---------- FORM ---------- */
 function submitForm() {
     const user = document.getElementById("username").value.trim();
     const pw = document.getElementById("password").value.trim();
@@ -142,6 +179,8 @@ function submitForm() {
         alert("아이디와 비밀번호를 입력해주세요.");
         return;
     }
+
+    bgm.pause();
     location.href = "intro.html";
 }
 

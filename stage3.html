@@ -13,6 +13,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   font-family: system-ui, sans-serif;
+  overflow: hidden;
 }
 
 .stage2-wrapper {
@@ -32,16 +33,32 @@ body {
 
 .maze-wrapper {
   position: absolute;
-  top: 50%;
+  top: 325px;
   left: 50%;
-  transform: translate(-50%, -50%) scale(1.35);
-  transform-origin: center center;
+  transform: translateX(-50%) scale(1.25);
+  transform-origin: top center;
   z-index: 2;
 }
 
 #game {
-  border: 2px solid #eee;
+  border: transparent;
   image-rendering: pixelated;
+}
+
+/* ===== CHEER TEXT ===== */
+.cheer-text {
+  position: absolute;
+  z-index: 3;
+  color: #ff67c0;
+  font-size: 25px;
+  font-family: dongle;
+  font-weight: 400;
+  background: transparent;
+  padding: 10px 16px;
+  text-align: center;
+  line-height: 0.9;
+  user-select: none;
+  pointer-events: none;
 }
 </style>
 </head>
@@ -49,33 +66,43 @@ body {
 <body>
 
 <div class="stage2-wrapper">
-  <img src="/assets/layoutmaze.png" class="stage-bg">
+  <img src="/assets/layoutmaze.png" class="stage-bg" id="stageBg">
+  <div class="cheer-text" id="cheerText"></div>
   <div class="maze-wrapper">
     <canvas id="game"></canvas>
   </div>
 </div>
+
+<!-- ✅ BGM 추가 (40초부터 시작, 이것만 추가됨) -->
+<audio id="bgm" src="assets/cute.mp3" autoplay muted loop></audio>
+
+<script>
+/* ===== BGM : START AT ~40s (Safari-safe, 기존 코드 영향 없음) ===== */
+const __bgm = document.getElementById("bgm");
+__bgm.addEventListener("loadedmetadata", () => {
+  __bgm.currentTime = 40;
+  setTimeout(() => {
+    __bgm.muted = false;
+  }, 120);
+});
+</script>
 
 <script>
 /* ===== SIZE ===== */
 const tileSize = 20;
 const playerSize = 42;
 const hitboxSize = 12;
-const guardW = 24;
-const guardH = 24;
 const fakeExitSize = 30;
 const realExitSize = 30;
 
 /* ===== COLORS ===== */
-const wallColor  = "#ef8ec7";
-const wallStroke = "#ffddff";
-const floorColor = "#c979aa";
+const wallColor  = "#ff9ef8";
+const wallStroke = "#e293c4";
+const floorColor = "#d150b3";
 
 /* ===== IMAGES ===== */
 const playerImg = new Image();
 playerImg.src = "/assets/star.png";
-
-const guardImg = new Image();
-guardImg.src = "/assets/faceiconp.png";
 
 const realExitImg = new Image();
 realExitImg.src = "/assets/square.png";
@@ -86,18 +113,10 @@ const fakeExitImages = [
   "/assets/polygon.png",
   "/assets/square.png"
 ].map(src => {
-  const i = new Image();
-  i.src = src;
-  return i;
+  const img = new Image();
+  img.src = src;
+  return img;
 });
-
-const fakeExitOffsets = [
-  { x: -2, y: -1 },
-  { x: 19, y: -1 },
-  { x: 2,  y: 17 },
-  { x: 17,  y: -20 }
-];
-const realExitOffset = { x: 1, y: 0 };
 
 /* ===== MAZE MAP ===== */
 const maze = [
@@ -134,7 +153,6 @@ let player = { x: 0, y: 0 };
 let start = { x: 0, y: 0 };
 const fakeExits = [];
 let realExit = null;
-const guards = [];
 
 /* ===== PARSE MAP ===== */
 for (let r = 0; r < rows; r++) {
@@ -156,23 +174,6 @@ for (let r = 0; r < rows; r++) {
   }
 }
 
-/* ===== GUARDS ===== */
-fakeExits.forEach(ex => {
-  guards.push({
-    exit: ex,
-    active: false,
-    x: ex.cx - tileSize,
-    y: ex.cy,
-    width: tileSize * 0.75,
-    height: tileSize * 0.55,
-    minX: ex.cx - tileSize,
-    maxX: ex.cx + tileSize,
-    dir: 1,
-    speed: 1.2,
-    triggerRadius: tileSize * 4
-  });
-});
-
 /* ===== INPUT ===== */
 const keys = {};
 window.addEventListener("keydown", e => keys[e.key] = true);
@@ -186,29 +187,16 @@ function isWall(px, py) {
 }
 
 /* ===== UPDATE ===== */
-let flickerFrame = 0;
-let playerVisible = true;
-
 function update() {
   const speed = 1.3;
   let vx = (keys.a || keys.ArrowLeft ? -1 : 0) + (keys.d || keys.ArrowRight ? 1 : 0);
   let vy = (keys.w || keys.ArrowUp ? -1 : 0) + (keys.s || keys.ArrowDown ? 1 : 0);
-
-  if (vx || vy) {
-    flickerFrame++;
-    if (flickerFrame % 6 === 0) playerVisible = !playerVisible;
-  } else {
-    flickerFrame = 0;
-    playerVisible = true;
-  }
 
   if (vx && vy) {
     vx *= Math.SQRT1_2;
     vy *= Math.SQRT1_2;
   }
 
-  const prevX = player.x;
-  const prevY = player.y;
   const half = hitboxSize / 2;
 
   const nx = player.x + vx * speed;
@@ -227,41 +215,20 @@ function update() {
     player.y = ny;
   }
 
-  guards.forEach(g => {
-    const d = Math.hypot(player.x - g.exit.cx, player.y - g.exit.cy);
-    if (!g.active && d < g.triggerRadius) g.active = true;
-    if (g.active) {
-      g.x += g.dir * g.speed;
-      if (g.x < g.minX || g.x > g.maxX) g.dir *= -1;
-    }
-  });
-
-  guards.forEach(g => {
-    if (!g.active) return;
-    if (
-      player.x + half > g.x &&
-      player.x - half < g.x + g.width &&
-      player.y + half > g.y &&
-      player.y - half < g.y + g.height
-    ) {
-      player.x = prevX;
-      player.y = prevY;
-    }
-  });
-
   fakeExits.forEach(ex => {
     if (Math.hypot(player.x - ex.cx, player.y - ex.cy) < tileSize * 0.35) {
-      alert("가짜 출구입니다! 다시 시작합니다.");
+      alert("가짜 출구입니다!");
       player.x = start.x;
       player.y = start.y;
     }
   });
 
-  /* ===== SUCCESS → STAGE 4 ===== */
-  if (realExit &&
-      Math.hypot(player.x - realExit.cx, player.y - realExit.cy) < tileSize * 0.35) {
+  if (
+    realExit &&
+    Math.hypot(player.x - realExit.cx, player.y - realExit.cy) < tileSize * 0.35
+  ) {
     alert("탈출 성공!");
-    window.location.href = "stage4.html";
+    window.location.href = "./stage4.html";
   }
 }
 
@@ -289,43 +256,17 @@ function draw() {
   drawMaze();
 
   let eIndex = 0;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const x = c * tileSize;
-      const y = r * tileSize;
-      if (maze[r][c] === "E") {
-        const img = fakeExitImages[eIndex % fakeExitImages.length];
-        const off = fakeExitOffsets[eIndex % fakeExitOffsets.length];
-        ctx.drawImage(img,
-          x + (tileSize - fakeExitSize) / 2 + off.x,
-          y + (tileSize - fakeExitSize) / 2 + off.y,
-          fakeExitSize, fakeExitSize);
-        eIndex++;
-      }
-      if (maze[r][c] === "R") {
-        ctx.drawImage(realExitImg,
-          x + (tileSize - realExitSize) / 2 + realExitOffset.x,
-          y + (tileSize - realExitSize) / 2 + realExitOffset.y,
-          realExitSize, realExitSize);
-      }
-    }
-  }
-
-  guards.forEach(g => {
-    if (g.active) {
-      ctx.drawImage(guardImg,
-        g.x + (g.width - guardW) / 2,
-        g.y + (g.height - guardH) / 2,
-        guardW, guardH);
-    }
+  fakeExits.forEach(ex => {
+    const img = fakeExitImages[eIndex % fakeExitImages.length];
+    ctx.drawImage(img, ex.cx - fakeExitSize / 2, ex.cy - fakeExitSize / 2, fakeExitSize, fakeExitSize);
+    eIndex++;
   });
 
-  if (playerVisible) {
-    ctx.drawImage(playerImg,
-      player.x - playerSize / 2,
-      player.y - playerSize / 2,
-      playerSize, playerSize);
+  if (realExit) {
+    ctx.drawImage(realExitImg, realExit.cx - realExitSize / 2, realExit.cy - realExitSize / 2, realExitSize, realExitSize);
   }
+
+  ctx.drawImage(playerImg, player.x - playerSize / 2, player.y - playerSize / 2, playerSize, playerSize);
 }
 
 /* ===== LOOP ===== */
@@ -335,6 +276,48 @@ function loop() {
   requestAnimationFrame(loop);
 }
 loop();
+
+/* ===== BACKGROUND IMAGE TOGGLE ===== */
+const bgImages = ["/assets/layoutmaze.png", "/assets/layoutmaze2.png"];
+let bgIndex = 0;
+const stageBg = document.getElementById("stageBg");
+
+setInterval(() => {
+  bgIndex = (bgIndex + 1) % bgImages.length;
+  stageBg.src = bgImages[bgIndex];
+}, 1000);
+
+/* ===== CHEER TEXT ===== */
+const cheerData = [
+  { text: "미로를 탈출해봐!", top: "210px", right: "610px" },
+  { text: "너 맘대로 해!", top: "210px", right: "620px" },
+  { text: "진짜 출구를 찾아봐!", top: "210px", right: "600px" },
+  { text: "틀린 출구는 없어!", top: "210px", right: "610px" },
+  { text: "넌 할 수 있어!", top: "210px", right: "613px" }
+];
+
+let cheerIndex = 0;
+const cheerText = document.getElementById("cheerText");
+
+function formatCheerText(text) {
+  const limit = 15;
+  if (text.length <= limit) return text;
+  const mid = Math.ceil(text.length / 2);
+  return text.slice(0, mid) + "<br>" + text.slice(mid);
+}
+
+function updateCheer() {
+  const data = cheerData[cheerIndex];
+  cheerText.innerHTML = formatCheerText(data.text);
+  cheerText.style.top = data.top;
+  cheerText.style.right = data.right;
+}
+
+updateCheer();
+setInterval(() => {
+  cheerIndex = (cheerIndex + 1) % cheerData.length;
+  updateCheer();
+}, 5000);
 </script>
 
 </body>

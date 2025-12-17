@@ -6,9 +6,15 @@
     <link rel="stylesheet" href="css/global.css">
 
     <style>
-        body {
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
             background-image: url("assets/mini_bg.png");
             background-size: cover;
             background-position: center;
@@ -18,7 +24,7 @@
         #container {
             width: 100vw;
             height: 100vh;
-            position: relative;  
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -66,7 +72,6 @@
 <body>
 
 <div id="container">
-
     <img id="sparkle" src="assets/sparkle.png" alt="sparkle">
 
     <div id="textBox">
@@ -74,50 +79,62 @@
     </div>
 
     <img id="character" src="assets/heartcharacter.png" alt="character">
-
 </div>
 
+<!-- ✅ BGM : Mac Safari SAFE -->
+<audio
+    id="bgm"
+    src="assets/cute.mp3"
+    autoplay
+    muted
+    loop
+></audio>
+
 <script>
-    const textImages = [
-        "assets/text1.png",
-        "assets/text2.png",
-        "assets/text3.png"
-    ];
+/* ---------- BGM (START AT 30s – SAFARI SAFE) ---------- */
+const bgm = document.getElementById("bgm");
 
-    // 세로 위치 (top)
-    const textTops = [
-        "47%",   // text1
-        "48%",   // text2 ← 세로 위치
-        "46.3%"    // text3
-    ];
+bgm.addEventListener("loadedmetadata", () => {
+    bgm.currentTime = 30;
 
-    // 가로 위치 (left)
-    const textLefts = [
-        "50%",   // text1
-        "52%",   // text2 ← 가로 위치 조정 HERE
-        "50%"    // text3
-    ];
+    // Safari needs a tiny delay before unmute
+    setTimeout(() => {
+        bgm.muted = false;
+        bgm.volume = 1;
+    }, 150);
+});
 
-    let currentIndex = 0;
+/* ---------- TEXT FLOW ---------- */
+const textImages = [
+    "assets/text1.png",
+    "assets/text2.png",
+    "assets/text3.png"
+];
 
-    const textBox = document.getElementById("textBox");
-    const textImage = document.getElementById("textImage");
+const textTops = ["47%", "48%", "46.3%"];
+const textLefts = ["50%", "52%", "50%"];
 
-    function updateText(index) {
-        textImage.src = textImages[index];
-        textBox.style.top = textTops[index];
-        textBox.style.left = textLefts[index];
+let currentIndex = 0;
+
+const textBox = document.getElementById("textBox");
+const textImage = document.getElementById("textImage");
+
+function updateText(index) {
+    textImage.src = textImages[index];
+    textBox.style.top = textTops[index];
+    textBox.style.left = textLefts[index];
+}
+
+document.body.addEventListener("click", () => {
+    currentIndex++;
+
+    if (currentIndex < textImages.length) {
+        updateText(currentIndex);
+    } else {
+        bgm.pause();
+        window.location.href = "stage2.html";
     }
-
-    document.body.addEventListener("click", () => {
-        currentIndex++;
-
-        if (currentIndex < textImages.length) {
-            updateText(currentIndex);
-        } else {
-            window.location.href = "stage2.html";
-        }
-    });
+});
 </script>
 
 </body>

@@ -7,7 +7,9 @@
 
     <style>
         body {
-            background: black; 
+            background: black;
+            margin: 0;
+            overflow: hidden;
         }
 
         /* 중앙 정렬 */
@@ -27,9 +29,9 @@
 
         /* 맥동 애니메이션 */
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.6; }
+            0%   { transform: scale(1);   opacity: 0.6; }
+            50%  { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1);   opacity: 0.6; }
         }
 
         /* 화면 전체 페이드인 */
@@ -39,21 +41,46 @@
 
         @keyframes fadeIn {
             from { opacity: 0; }
-            to { opacity: 1; }
+            to   { opacity: 1; }
         }
     </style>
-
 </head>
 
 <body class="fade-in">
 
     <div id="loading-container">
-        <img src="assets/loading.png" class="loading-icon">
+        <img src="assets/loading.png" class="loading-icon" alt="Loading">
     </div>
 
-<script>
-    // 3초 후 userps.html 로 이동
-    setTimeout(() => {
-        window.location.href = "userps.html";
-    }, 3000);
-</script>
+    <!-- Background Music -->
+    <audio id="bgm" src="assets/cute.mp3" loop></audio>
+
+    <script>
+        const bgm = document.getElementById("bgm");
+        bgm.volume = 0;
+
+        function startAudio() {
+            bgm.play().catch(() => {});
+            let volume = 0;
+
+            const fadeIn = setInterval(() => {
+                volume += 0.02;
+                bgm.volume = Math.min(volume, 1);
+                if (volume >= 1) clearInterval(fadeIn);
+            }, 50);
+
+            document.removeEventListener("click", startAudio);
+            document.removeEventListener("touchstart", startAudio);
+        }
+
+        document.addEventListener("click", startAudio);
+        document.addEventListener("touchstart", startAudio);
+
+        // 3초 후 userps.html 로 이동
+        setTimeout(() => {
+            window.location.href = "userps.html";
+        }, 3000);
+    </script>
+
+</body>
+</html>

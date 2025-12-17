@@ -69,7 +69,7 @@ input.real-input {
 .caret {
     width: 2px;
     height: 1em;
-    background: #ef8ec7;
+    background: #ff67c0;
     margin-left: 3px;
     animation: blink 0.7s steps(1) infinite;
 }
@@ -87,7 +87,7 @@ input.real-input {
 }
 
 .doubt {
-    color:#ef8ec7;
+    color:#ff67c0;
     font-size:25px;
     width: 250px;
     line-height: 0.9;
@@ -95,7 +95,7 @@ input.real-input {
 }
 
 .hint {
-    color:#ef8ec7;
+    color:#ff67c0;
     font-size:25px;
     width:350px;
     line-height:0.9;
@@ -124,17 +124,16 @@ input.real-input {
 }
 
 @keyframes crazyGlow {
-    0% { text-shadow: 0 0 4px #ff6bff; }
-    100% { text-shadow: 0 0 12px #ff00ea, 0 0 20px #ff73ff; }
+    0% { text-shadow: 0 0 4px #ff67c0; }
+    100% { text-shadow: 0 0 12px #ff67c0, 0 0 20px #ff67c0; }
 }
 
 .fade-out { animation: fadeOut 0.7s forwards; }
 @keyframes fadeOut { to { opacity:0; } }
 
-/* ANSWER BUBBLE */
 .answer-bubble {
     position: absolute;
-    color:#ef8ec7;
+    color:#ff67c0;
     font-size:25px;
     width:350px;
     line-height:0.9;
@@ -149,8 +148,8 @@ input.real-input {
 
 #q1fake .text { color:#81619f; }
 #q1fake .caret { background:#81619f; }
-#q2fake .text { color:#f572be; }
-#q2fake .caret { background:#f572be; }
+#q2fake .text { color:#ff67c0; }
+#q2fake .caret { background:#ff67c0; }
 #q3fake .text { color:#628ecc; }
 #q3fake .caret { background:#628ecc; }
 </style>
@@ -158,7 +157,7 @@ input.real-input {
 
 <body>
 <div class="stage2-wrapper">
-<img src="assets/stage2bg.png" class="stage-bg">
+<img src="assets/stage2bg.png" class="stage-bg" id="stageBg">
 
 <!-- Q1 -->
 <div class="section" id="q1" style="top:250px; left:350px;">
@@ -194,94 +193,117 @@ input.real-input {
 </div>
 
 <audio id="wrongSound" src="assets/wrong.mp3"></audio>
+
+<!-- ✅ BGM (40초부터 시작) -->
+<audio id="bgm" src="assets/cute.mp3" autoplay muted loop></audio>
+
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-const wrongSound = document.getElementById("wrongSound");
+    /* ✅ BGM : START AT ~40s (Safari-safe) */
+    const bgm = document.getElementById("bgm");
+    bgm.addEventListener("loadedmetadata", () => {
+        bgm.currentTime = 40;
+        setTimeout(() => {
+            bgm.muted = false;
+        }, 120);
+    });
 
-function bindFake(inputId,fakeId){
-    const input=document.getElementById(inputId);
-    const t=document.querySelector(`#${fakeId} .text`);
-    input.addEventListener("input",()=>t.textContent=input.value);
-    document.getElementById(fakeId).addEventListener("click",()=>input.focus());
-}
+    const stageBg = document.getElementById("stageBg");
+    let bgToggle = false;
 
-bindFake("q1input","q1fake");
-bindFake("q2input","q2fake");
-bindFake("q3input","q3fake");
+    setInterval(() => {
+        stageBg.src = bgToggle
+            ? "assets/stage2bg.png"
+            : "assets/stage2bg2.png";
+        bgToggle = !bgToggle;
+    }, 1000);
 
-const attempts={q1:0,q2:0,q3:0};
+    const wrongSound = document.getElementById("wrongSound");
 
-const hintsMap={
-    q1:[["앞글자는 ‘두’. 디저트","느낌 나는 단어야!"],["‘두바이’와 관련 있어.","도시 이름이 들어가!"],["쫀득쫀득한 식감…","이제 정말 다 왔어."],["거의 다 왔어!","두바이쫀득쿠키!"]],
-    q2:[["‘로’로 시작해.","라면 느낌 나는 음식이야."],["매운 라면 계열.","불닭 계열!"],["불닭 + 납작당면.","힌트 거의 다 줬다…"],["마지막 힌트!","로제불닭납작당면!"]],
-    q3:[["걸그룹 노래.","요즘 뜨는 팀!"],["그룹명은 아일릿!","귀엽지 않다고 주장해."],["‘낫 큐트’ 느낌.","거의 다 왔어."],["마지막 힌트!","아일릿의 ‘낫 큐트’!"]]
-};
+    function bindFake(inputId,fakeId){
+        const input=document.getElementById(inputId);
+        const t=document.querySelector(`#${fakeId} .text`);
+        input.addEventListener("input",()=>t.textContent=input.value);
+        document.getElementById(fakeId).addEventListener("click",()=>input.focus());
+    }
 
-const answerBubblePosition={q1:{top:"-22px",left:"440px"},q2:{top:"-250px",left:"440px"},q3:{top:"-480px",left:"440px"}};
-const answerBubbleText={q1:"정답이야!",q2:"맞아.",q3:"정답."};
+    bindFake("q1input","q1fake");
+    bindFake("q2input","q2fake");
+    bindFake("q3input","q3fake");
 
-function spawnAnswerBubble(key){
-    const bubble=document.createElement("p");
-    bubble.className="answer-bubble crazy";
-    bubble.innerHTML=answerBubbleText[key];
-    bubble.style.top=answerBubblePosition[key].top;
-    bubble.style.left=answerBubblePosition[key].left;
-    document.getElementById(key).appendChild(bubble);
-    setTimeout(()=>{bubble.classList.add("fade-out");setTimeout(()=>bubble.remove(),700);},2500);
-}
+    const attempts={q1:0,q2:0,q3:0};
 
-const answers=["두바이쫀득쿠키","로제불닭납작당면","아일릿의 낫 큐트"];
+    const hintsMap={
+        q1:[["앞글자는 ‘두’. 디저트","느낌 나는 단어야!"],["‘두바이’와 관련 있어.","도시 이름이 들어가!"],["쫀득쫀득한 식감…","이제 정말 다 왔어."],["거의 다 왔어!","두바이쫀득쿠키!"]],
+        q2:[["‘로’로 시작해.","라면 느낌 나는 음식이야."],["매운 라면 계열.","불닭 계열!"],["불닭 + 납작당면.","힌트 거의 다 줬다…"],["마지막 힌트!","로제불닭납작당면!"]],
+        q3:[["걸그룹 노래.","요즘 뜨는 팀!"],["그룹명은 아일릿!","귀엽지 않다고 주장해."],["‘낫 큐트’ 느낌.","거의 다 왔어."],["마지막 힌트!","아일릿의 ‘낫 큐트’!"]]
+    };
 
-function autoWrite(span,text,input){
-    span.textContent="";
-    let i=0;
-    const chars=[...text];
-    (function type(){
-        if(i<chars.length){
-            span.textContent+=chars[i++];
-            setTimeout(type,200);
+    const answerBubblePosition={q1:{top:"-22px",left:"440px"},q2:{top:"-250px",left:"440px"},q3:{top:"-480px",left:"440px"}};
+    const answerBubbleText={q1:"정답이야!",q2:"맞아.",q3:"정답."};
+
+    function spawnAnswerBubble(key){
+        const bubble=document.createElement("p");
+        bubble.className="answer-bubble crazy";
+        bubble.innerHTML=answerBubbleText[key];
+        bubble.style.top=answerBubblePosition[key].top;
+        bubble.style.left=answerBubblePosition[key].left;
+        document.getElementById(key).appendChild(bubble);
+        setTimeout(()=>{bubble.classList.add("fade-out");setTimeout(()=>bubble.remove(),700);},2500);
+    }
+
+    const answers=["두바이쫀득쿠키","로제불닭납작당면","아일릿의 낫 큐트"];
+
+    function autoWrite(span,text,input){
+        span.textContent="";
+        let i=0;
+        const chars=[...text];
+        (function type(){
+            if(i<chars.length){
+                span.textContent+=chars[i++];
+                setTimeout(type,200);
+            }
+        })();
+        input.value=text;
+    }
+
+    function handleQuestion(key,inputEl,correct,nextStep){
+        const doubtEl=document.getElementById(key+"doubt");
+        const hintEl=document.getElementById(key+"hint");
+        const value=inputEl.value.trim();
+        if(!value)return;
+
+        if(value===correct){
+            doubtEl.classList.add("hidden");
+            hintEl.innerHTML="정답! 😆<br>너 정말 잘 맞췄다!";
+            hintEl.classList.remove("hidden");
+            hintEl.classList.add("crazy");
+            spawnAnswerBubble(key);
+            setTimeout(()=>{hintEl.classList.add("hidden");nextStep&&nextStep();},3000);
+            return;
         }
-    })();
-    input.value=text;
-}
 
-function handleQuestion(key,inputEl,correct,nextStep){
-    const doubtEl=document.getElementById(key+"doubt");
-    const hintEl=document.getElementById(key+"hint");
-    const value=inputEl.value.trim();
-    if(!value)return;
+        wrongSound.currentTime=0;
+        wrongSound.play();
+        attempts[key]++;
 
-    if(value===correct){
-        doubtEl.classList.add("hidden");
-        hintEl.innerHTML="정답! 😆<br>너 정말 잘 맞췄다!";
+        if(attempts[key]===5){
+            autoWrite(document.getElementById(key+"text"),correct,inputEl);
+        }
+
+        const[h1,h2]=hintsMap[key][Math.min(attempts[key]-1,hintsMap[key].length-1)];
+        doubtEl.innerHTML="그게 맞아…?<br>다시 생각해봐.";
+        hintEl.innerHTML=`${h1}<br>${h2}`;
+        doubtEl.classList.remove("hidden");
         hintEl.classList.remove("hidden");
-        hintEl.classList.add("crazy");
-        spawnAnswerBubble(key);
-        setTimeout(()=>{hintEl.classList.add("hidden");nextStep&&nextStep();},3000);
-        return;
     }
 
-    wrongSound.currentTime=0;
-    wrongSound.play();
-    attempts[key]++;
-
-    if(attempts[key]===5){
-        autoWrite(document.getElementById(key+"text"),correct,inputEl);
-    }
-
-    const[h1,h2]=hintsMap[key][Math.min(attempts[key]-1,hintsMap[key].length-1)];
-    doubtEl.innerHTML="그게 맞아…?<br>다시 생각해봐.";
-    hintEl.innerHTML=`${h1}<br>${h2}`;
-    doubtEl.classList.remove("hidden");
-    hintEl.classList.remove("hidden");
-}
-
-q1btn.onclick=()=>handleQuestion("q1",q1input,answers[0],()=>q2.classList.remove("hidden"));
-q2btn.onclick=()=>handleQuestion("q2",q2input,answers[1],()=>q3.classList.remove("hidden"));
-q3btn.onclick=()=>handleQuestion("q3",q3input,answers[2],()=>{document.body.classList.add("fade-out");setTimeout(()=>location.href="stage3.html",700);});
+    q1btn.onclick=()=>handleQuestion("q1",q1input,answers[0],()=>q2.classList.remove("hidden"));
+    q2btn.onclick=()=>handleQuestion("q2",q2input,answers[1],()=>q3.classList.remove("hidden"));
+    q3btn.onclick=()=>handleQuestion("q3",q3input,answers[2],()=>{document.body.classList.add("fade-out");setTimeout(()=>location.href="stage3.html",700);});
 
 });
 </script>
